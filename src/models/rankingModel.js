@@ -65,11 +65,27 @@ function buscarScore(idUsuario) {
     return database.executar(instrucaoSql);
 }
 
+function buscarTopOst() {
+    var instrucaoSql = `
+    SELECT 
+        titulo,
+        COUNT(ru.id) total_acertos
+    FROM respostasUser ru
+    JOIN alternativas a ON fkAlternativa = a.id
+    WHERE a.tipo = 1 AND titulo != 'null'
+    GROUP BY titulo
+    ORDER BY total_acertos DESC
+    LIMIT 1;`
+
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
 module.exports = {
     buscarTopUsuario,
     buscarRanking,
     calcularMedia,
     adicionarResposta,
     somarAcertos,
-    buscarScore
+    buscarScore,
+    buscarTopOst
 };

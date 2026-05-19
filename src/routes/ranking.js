@@ -26,4 +26,8 @@ router.post("/soma", function(req,res) {
 router.get("/score/:id", function(req,res) {
     rankingController.buscarScore(req,res);
 })
+
+router.get("/buscar/topOst", function(req,res) {
+    rankingController.buscarTopOst(req,res);
+})
 module.exports = router;

@@ -154,12 +154,30 @@ h2 {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  width: 90%;
 }
 
+.interesse .top {
+  width: 90vw;
+  height: 20vh;
+  max-height: 20vh;
+  display: flex;
+  flex-direction: row;
+  margin: 1vh 0;
+  justify-content: space-around;
+}
 .interesse span {
-  width: 40vw;
-  line-height: 1.5;
-  text-align: center;
+  width: 20vw;
+  /* line-height: 1.5; */
+  text-align: left;
+  font-size: 18px;
+  
+  /* margin: 0 2vw; */
+}
+.interesse img {
+  width: 300px;
+  height: 170px;
+  /* margin: 0 2vw; */
 }
 
 /* Exemplos */
@@ -167,6 +185,7 @@ h2 {
 .exemplo {
   display: flex;
   color: white;
+  margin-top: 3vh;
 }
 
 .exemplo .container {

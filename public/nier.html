@@ -70,49 +70,55 @@
     <div class="container" id="text">
       <h1>Por que escolhi essa OST?</h1>
 
-      <span>
-        Em uma frase, o motivo de eu ter escolhido essa OST como exemplo é porque ela é não só é minha OST favorita,
-        como também é minha música favorita. A ideia de criar uma página dedicada para cada Soundtrack exibiada na
-        página inicial surgiu por causa dessa música. <br>
-        Antes de entrar nos detalhes, gostaria de deixar explícito que tudo que eu falar aqui é a junção da <b>minha
-          interpretação</b> com alguns fatos.
-        <hr>
-        Essa música toca nos créditos de cada final, mudando o idioma em cada final. Os finais são chamados de Rota, e
-        nesse jogo, há 5 Rotas principais.
-        Na Rota A, toca a versão em inglês, na Rota B, toca a versão em japonês, e na Rota C toca a versão do Caos,
-        idioma este inventado por Emi Evans, que buscava simular um idioma futurístico que mistura vários idiomas,
-        inclusive alguns quase extintos.
-        Na Rota D, a versão Caos se repete, mas desta vez, os créditos são interrompidos por um diálogo, e dependendo
-        das escolhas do jogador nele, a rota E se inicia...<br>
-        <hr>
-        A música começa como todas as outras versões, exceto por duas coisas: O instrumental é em 8-bit e não tem
-        ninguém cantando.
+      <p>
+        Weight of the World the End of YoRHa não é apenas minha trilha favorita, como também minha música favorita e a
+        razão para eu criar páginas para cada OST. Ela toca nos créditos finais do jogo, mudando de idioma a cada
+        "Rota": inglês na <b>Rota A</b>, japonês na <b>Rota B</b>, e o idioma do Caos (criado por Emi Evans) na <b>Rota
+          C</b>.
+        Na <b>Rota D</b>, a versão Caos se repete, mas desta vez, os créditos são interrompidos por um diálogo que nos
+        guia ao verdadeiro final do jogo: a <b>Rota E</b>.
+      </p>
+      <hr>
+      <div class="flex">
+        <p>
+          A música começa como todas as outras versões, exceto por duas coisas: O instrumental é em <b>8-bit</b> e não
+          tem
+          ninguém cantando.
 
-        O formato em 8-bit havia aparecido constantemente desde a rota B, quando jogamos com um personagem que consegue
-        hackear os inimigos, como podemos ver a seguir:
+          O formato em 8-bit havia aparecido constantemente desde a <b>rota B</b>, quando jogamos com um personagem,
+          <b>9S</b>, que
+          consegue
+          hackear os inimigos, como podemos ver a seguir:
+        </p>
         <br>
-        <div id="img_9s">
+        <div id="img_9s" class="img_flex">
           <img onclick="tocarVideo()" src="./assets/imgs/9SYT.png">
         </div>
         <br>
-
+      </div>
+      <hr>
+      <p>
         Quando chegamos no refrão, a música deixa de ser em 8-bit e o refrão da versão em inglês começa a ser cantado.
-        <br>
         Já o segundo verso tem a primeira parte cantada em japonês e a segunda parte em Caos. O inglês volta a ser
         cantado no pré-refrão e é substituído pelo japonês no refrão— mas algo está diferente...
-        <br>
-        <hr>
+      </p>
+      <hr>
+      <div class="flex">
+        <p>
         A rota E, que é o final verdadeiro do jogo, é possívelmente o momento mais marcante e emocionante do jogo
         inteiro para muitos jogadores, inclusive eu. Em uma tentativa de ir contra o sistema criado pelos
         desenvolvedores do jogo, o jogador, similar a quando hackeia um inimigo, precisa lutar contra inimigos que
         atacam o jogador de volta, mas agora os inimigos são os créditos finais:
-        <img src="./assets/imgs/endingE.png" alt="Nier:Automata Ending E">
-        <br>
+      </p>
+      <img src="./assets/imgs/endingE.png" alt="Nier:Automata Ending E">
+      </div>
+      <hr>
+      <p>
         No início, os inimigos são de dificuldade fácil, o que possibilita o jogador de derrotá-los sem grandes
         problemas. Porém, após alguns minutos, a dificuldade fica exponencialmente mais difícil, até chegar ao ponto do
         jogador não conseguir mais derrotar nenhum inimigo, e isso se repete uma vez, duas vezes, três vezes, quatro
         vezes, cinco vezes—
-        <br>
+      </p>
       </span>
       <div class="fundo">
         <span>"VOCÊ ACEITA A DERROTA?"</span>
@@ -123,11 +129,14 @@
       <div class="fundo">
         <span>"DESISTIR AQUI?"</span>
       </div>
-      <span>Enquanto isso, mensagens de encorajamento de outros jogadores, em diversos idiomas, preenchem a tela.<br>
-        Após mais uma derrota, a última pergunta surge na tela:</span>
+      <p>Enquanto isso, mensagens de encorajamento de outros jogadores, em diversos idiomas, preenchem a tela.
+        Após mais uma derrota, a última pergunta surge na tela:
+      </p>
+
       <div class="fundo">
         <span>"ACEITAR OFERTA?"</span>
       </div>
+
       <button onclick="mostrar()" class="botao">SIM</button>
       <audio id="nierE" src="assets/audio/Weight_of_the_world_E.mp3"></audio>
     </div>
@@ -143,12 +152,15 @@
   function mostrar() {
     audio.pause();
     nierE.play();
-    text.innerHTML += `<span>Imediatamente, um coral de vozes se junta a voz que até então estava sozinha, e o jogador, após aceitar a oferta, se vê rodeado de outros jogadores:
+    text.innerHTML += `<p>Imediatamente, um coral de vozes se junta a voz que até então estava sozinha, e o jogador, após aceitar a oferta, se vê rodeado de outros jogadores. Ele não está mais sozinho:<p>
     <img src="./assets/imgs/endingE-finale.jpg">
-    <br>
-    Esse coral é composto pela equipe de desenvolvedores e pelo próprio criador do jogo, Yoko Taro, intensificando a emoção que está presente nesse momento.
+    <p>
+    Esse coral é composto pela equipe de desenvolvedores e pelo próprio criador do jogo, Yoko Taro, intensificando a emoção presente nas vozes nesse momento.
+    </p>
     <hr>
-    E é por causa de tudo isso que compõe não só o significado, mas a música em si, que esta OST é minha música favorita. <br>
+    <p>
+    E é essa união, conexão, entre a música, a jogabilidade, e a história que tornam essa OST a minha favorita.
+    </p>
     <button class="botao" onclick="window.location.href='index.html'">Voltar a Home</button>`
 
   }

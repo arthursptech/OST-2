@@ -28,7 +28,7 @@
 
 <!-- <body onload=" atualizarFeed()"> -->
 
-<body onload="validarSessao(), listarTop(), listarMedia(), obterDadosGrafico(), buscarScore()">
+<body onload="validarSessao(), listarTop(), listarMedia(), obterDadosGrafico(), buscarScore(), buscarTopOst()">
 
     <div class="janela">
         <div class="header-left">
@@ -76,11 +76,7 @@
                     </div>
                     <div class="item-regua alerta-frio">
                         <p>OST com mais acertos</p>
-                        <p id="topOst">ost#1</p>
-                    </div>
-                    <div class="item-regua ideal">
-                        <p>Média de acertos</p>
-                        <p> <span id="media">media</span>/10</p>
+                        <p id="ost">ost#1</p>
                     </div>
                     <div class="item-regua alerta-quente">
                         <p>OST com mais erros</p>
@@ -90,13 +86,27 @@
                         <p>Seu score:</p>
                         <p><span id="scoreUser">score</span>/10</p>
                     </div>
+                    <div class="item-regua ideal">
+                        <p>Média de acertos</p>
+                        <p> <span id="media">media</span>/10</p>
+                    </div>
+                    
                 </div>
             </div>
 
-            <div class="btns-dash" id="btnAquario">
-            </div>
+            <!-- <div class="btns-dash" id="btnAquario">
+            </div> -->
             <div class="ranking-graph">
                 <canvas id="graficos"></canvas>
+                 <!-- <div class="posicao" id="div_posicao">
+                    <span>1</span>
+                    <span>2</span>
+                 </div>
+                 <div class="nomes">
+                    <span>arthur</span>
+                    <span>frajola</span>
+                 </div>
+                 <div class="acertos"></div> -->
             </div>
         </div>
     </div>
@@ -167,6 +177,18 @@
         })
         .catch(err => {
             console.log(err);
+        })
+    }
+
+    function buscarTopOst() {
+        fetch("/ranking/buscar/topOst").then(function (resposta) {
+            if (resposta.ok) {
+                resposta.json().then(function (resposta) {
+                    console.log("Dados recebidos: ", JSON.stringify(resposta));
+                    var topOst = resposta[0];
+                    document.getElementById("ost").innerHTML = topOst.titulo;
+                })
+            }
         })
     }
 

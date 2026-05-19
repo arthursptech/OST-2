@@ -87,11 +87,26 @@ function buscarScore(req,res) {
             res.status(500).send(err);
         })
 }
+
+function buscarTopOst(req,res) {
+    rankingModel.buscarTopOst().then(function (resultado) {
+        if (resultado.length > 0) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(204).send("Nenhum resultado encontrado!")
+        }
+    }).catch(function (erro) {
+        console.log(erro);
+        console.log("Houve um erro ao buscar a top OST: ", erro.sqlMessage);
+        res.status(500).json(erro.sqlMessage);
+    });
+}
 module.exports = {
     buscarTopUsuario,
     buscarRanking,
     calcularMedia,
     adicionarResposta,
     somarAcertos,
-    buscarScore
+    buscarScore,
+    buscarTopOst
 }

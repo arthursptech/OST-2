@@ -126,13 +126,13 @@ body {
 }
 
 .area-parametros-alerta {
-  /* border: 2px solid pink; */
   display: flex;
   flex-direction: column;
   width: 70%;
   margin: auto;
   margin-top: 15px;
   background-color: #000000;
+  margin-left: 5vw;
 }
 
 .parametros-alerta {
@@ -188,13 +188,35 @@ body {
 } */
 
 .dash .ranking-graph {
-  width: 75%;
+  width: 50%;
   display: flex;
   justify-content: center;
+  flex-direction: row;
   align-items: center;
-  margin-left: 10vw;
+  margin-left: 5vw;
   border: solid 2px #761414;
+  min-height: 30vh;
   height: fit-content;
+  margin-top: 5vh;
+}
+
+.posicao {
+  display: flex;
+  justify-content: start;
+  flex-direction: column;
+  color: white;
+  width: 30%;
+  align-items: start;
+  height: 25vh;
+}
+.nomes {
+  display: flex;
+  justify-content: start;
+  flex-direction: column;
+  color: white;
+  width: 30%;
+  align-items: start;
+  height: 25vh;
 }
 .cards {
   display: flex;
