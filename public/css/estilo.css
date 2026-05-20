@@ -449,15 +449,28 @@ h2 {
 .loading-div {
   width: 50px;
   display: none;
+  position: fixed; 
+  top: 0 ; 
+  left: 0 ;
+  width: 100vw !important;
+  height: 100vh ;
+  background-color: rgba(0,0,0,0.75);
+  justify-content: center;
+  align-items: center;
+  color:#761414;
+  font-size: 20px;
+  font-family: Persona5;
 }
 
 .loading-div img {
   height: 50px;
   width: 50px;
 }
-
+.loading-div p {
+  margin-left: 10px;
+}
 #div_erros_login {
-  display: none
+  display: none;
 }
 
 /* FORMULARIO */
