@@ -16,15 +16,14 @@
 </head>
 
 <body>
-  <audio autoplay loop id="audio" src="https://codehs.com/uploads/1c434c2fc4cf2702ff3a5dc9773ef531"></audio>
+  <audio autoplay loop id="audio" src="https://codehs.com/uploads/8aaa5a11a5427c8ec6525d8823ab3e3a"></audio>
 
 
   <header>
     <div class="musica">
       <div class="container">
-        <img src="https://cdn.modrinth.com/data/G0jB05Ux/181588c9480c48b2fb75889d36553460c6f46eb9.gif"><span>Música
-          tocando: <a href="https://youtu.be/LC5HsZt4oNc?si=3sJ8ht90bhCy5bTLa">Keiichi Okabe: City Ruins - Rays of
-            Light</a>
+        <img src="https://cdn.modrinth.com/data/G0jB05Ux/181588c9480c48b2fb75889d36553460c6f46eb9.gif"><span id="musicaNow">Música
+          tocando: <a href="https://www.youtube.com/watch?v=PslQESlD4xs">Keiichi Okabe: Weight of the World the End of Yorha - Incompleta</a>
           <a onclick="document.getElementById('audio').play()"><i class="fas fa-play"></i></a>
           <a onclick="document.getElementById('audio').pause()"><i class="fas fa-pause"></i></a>
         </span>
@@ -138,7 +137,8 @@
       </div>
 
       <button onclick="mostrar()" class="botao">SIM</button>
-      <audio id="nierE" src="assets/audio/Weight_of_the_world_E.mov"></audio>
+      <audio id="nierE" src="assets/audio/Weight_of_the_world_Ending.mov"></audio>
+      <div id="final" class="container"></div>
     </div>
   </div>
 
@@ -152,7 +152,13 @@
   function mostrar() {
     audio.pause();
     nierE.play();
-    text.innerHTML += `<p>Imediatamente, um coral de vozes se junta a voz que até então estava sozinha, e o jogador, após aceitar a oferta, se vê rodeado de outros jogadores. Ele não está mais sozinho:<p>
+
+    musicaNow.innerHTML = `Música
+          tocando: <a href="https://www.youtube.com/watch?v=PslQESlD4xs">Keiichi Okabe: Weight of the World the End of YoRha - Parte Final</a>
+          <a onclick="document.getElementById('nierE').play()"><i class="fas fa-play"></i></a>
+          <a onclick="document.getElementById('nierE').pause()"><i class="fas fa-pause"></i></a>`;
+    document.getElementById("final").style.display = "flex";
+    final.innerHTML = `<p>Imediatamente, um coral de vozes se junta a voz que até então estava sozinha, e o jogador, após aceitar a oferta, se vê rodeado de outros jogadores. Ele não está mais sozinho:<p>
     <img src="./assets/imgs/endingE-finale.jpg">
     <p>
     Esse coral é composto pela equipe de desenvolvedores e pelo próprio criador do jogo, Yoko Taro, intensificando a emoção presente nas vozes nesse momento.

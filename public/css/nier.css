@@ -251,3 +251,7 @@ iframe {
 hr {
   width: 100%;
 }
+
+#final {
+  display: none;
+}

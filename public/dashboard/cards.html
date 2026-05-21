@@ -67,7 +67,7 @@
         <div class="body" id="main">
             <div class="question" id="Q1">
                 <span>Questão 1 - De onde é essa OST?</span>
-                <audio controls src="https://codehs.com/uploads/8fbd34850563b0d73ff295de1869ad65"></audio>
+                <audio controls src="https://codehs.com/uploads/8fbd34850563b0d73ff295de1869ad65" id="A1" class="musicaQuiz"></audio>
 
                 <div class="container-question">
 
@@ -108,7 +108,7 @@
 
             <div class="question" id="Q2">
                 <span>Questão 2 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="https://codehs.com/uploads/ef76a1c9c8743f620a20e134062b03a5 " id="A2"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -140,7 +140,7 @@
 
             <div class="question" id="Q3">
                 <span>Questão 3 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="https://codehs.com/uploads/99516aea46d717f07959f4355f88256a" id="A3" ></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -172,7 +172,7 @@
 
             <div class="question" id="Q4">
                 <span>Questão 4 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="../assets/audio/Worldend_dominator.mp3" id="A4"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -204,7 +204,7 @@
 
             <div class="question" id="Q5">
                 <span>Questão 5 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="" id="A5"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -236,7 +236,7 @@
 
             <div class="question" id="Q6">
                 <span>Questão 6 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="" id="A6"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -268,7 +268,7 @@
 
             <div class="question" id="Q7">
                 <span>Questão 7 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="" id="A7"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -300,7 +300,7 @@
 
             <div class="question" id="Q8">
                 <span>Questão 8 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="" id="A8"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -332,7 +332,7 @@
 
             <div class="question" id="Q9">
                 <span>Questão 9 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="" id="A9"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -364,7 +364,7 @@
 
             <div class="question" id="Q10">
                 <span>Questão 10 - De onde é essa OST?</span>
-                <audio controls src=""></audio>
+                <audio controls src="" id="A10"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -432,6 +432,10 @@
 
             if (resposta.ok) {
                 console.log("resposta está ok");
+
+                 setTimeout(function () {
+                    window.location = "./dashboard.html";
+                }, 1000);
             } else {
                 console.log("Houve um erro ao registrar a resposta do usuário");
                 window.location = "cards.html";
@@ -471,6 +475,9 @@
         document.getElementById('iniciarBotao').style.display = "none";
     }
     function mudarQuestao(questao) {
+        var musica = document.getElementById(`A${questao - 1}`)
+        musica.volume = 0.4;
+        musica.pause();
         let questaoAtual = document.getElementById(`Q${questao - 1}`);
         let radio = questaoAtual.querySelector('[type="radio"]:checked');
         let respostaUser = radio.id;
