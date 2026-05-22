@@ -4,15 +4,14 @@ function buscarTopUsuario() {
     console.log("Buscando o usuário que mais acertou perguntas no quiz");
 
     var instrucaoSql = `
-        SELECT fkUsuario, nome FROM ranking JOIN usuario ON fkUsuario = usuario.id ORDER BY qtd_acertos DESC LIMIT 1;
-    `;
+        SELECT fkUsuario, nome FROM ranking ORDER BY qtd_acertos DESC LIMIT 1;`;
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);
 }
 
 function buscarRanking() {
     var instrucaoSql = `
-    SELECT nome, fkUsuario, qtd_acertos FROM ranking JOIN usuario ON fkUsuario = usuario.id ORDER BY qtd_acertos DESC;`;
+    SELECT * FROM ranking;`;
 
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);

@@ -28,7 +28,7 @@
 
 <!-- <body onload=" atualizarFeed()"> -->
 
-<body onload="validarSessao(), listarTop(), listarMedia(), obterDadosGrafico(), buscarScore(), buscarTopOst()">
+<body onload="validarSessao(), listarTop(), listarMedia(), listaGrafico(), buscarScore(), buscarTopOst()">
 
     <div class="janela">
         <div class="header-left">
@@ -79,8 +79,8 @@
                         <p id="ost">ost#1</p>
                     </div>
                     <div class="item-regua alerta-quente">
-                        <p>OST com mais erros</p>
-                        <p id="botOst">ost<# </p>
+                        <p>Números de Jogadores</p>
+                        <p id="qtd_user">qtd_user</p>
                     </div>
                     <div class="item-regua perigo-quente">
                         <p>Seu score:</p>
@@ -96,17 +96,18 @@
 
             <!-- <div class="btns-dash" id="btnAquario">
             </div> -->
-            <div class="ranking-graph">
-                <canvas id="graficos"></canvas>
-                 <!-- <div class="posicao" id="div_posicao">
-                    <span>1</span>
-                    <span>2</span>
-                 </div>
-                 <div class="nomes">
-                    <span>arthur</span>
-                    <span>frajola</span>
-                 </div>
-                 <div class="acertos"></div> -->
+            <div class="graphs-line">
+                <div class="ranking-graph" id="div_posicao">
+                    <div class="posicao" id="titulos">
+                        <span>Posição</span>
+                        <span>Nomes</span>
+                        <span>Acertos</span>
+                    </div>
+                    <br>
+                </div>
+                <div class="ranking-avg-graph">
+                    <canvas id="graficos"></canvas>
+                </div>
             </div>
         </div>
     </div>
@@ -122,6 +123,7 @@
     let idUser = sessionStorage.ID_USUARIO;
     const ranking = document.getElementById('graficos');
     Chart.defaults.color = '#FFF';
+    Chart.defaults.font.size = 16;
     // new Chart(ranking, {
     //     type: 'bar',
     //     data: {
@@ -130,8 +132,8 @@
     //             label: 'Acertos',
     //             data: [10, 7, 6, 3, 5, 8, 4],
     //             borderWidth: 1,
-    //             backgroundColor: '#E98934',
-    //             borderColor: '#E98934'
+    //             backgroundColor: '#E63946',
+    //             borderColor: '#E63946'
     //         }]
     //     },
     //     options: {
@@ -158,9 +160,9 @@
             if (resposta.ok) {
                 resposta.json().then(function (resposta) {
                     console.log("Dados recebidos: ", JSON.stringify(resposta));
-                    var result = resposta[0];
-                    document.getElementById("media").innerHTML = result.media;
-
+                    var resultMedia = resposta[0];
+                    document.getElementById("media").innerHTML = resultMedia.media;
+                    plotarGrafico(resposta);
                 })
             }
         })
@@ -235,16 +237,28 @@
 
     //     Se quiser alterar a busca, ajuste as regras de negócio em src/controllers
     //     Para ajustar o "select", ajuste o comando sql em src/models
-
-    function obterDadosGrafico() {
+    
+    function listaGrafico() {
 
         fetch("/ranking/listar", { cache: 'no-store' }).then(function (response) {
             if (response.ok) {
                 response.json().then(function (resposta) {
                     console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
-
-                    plotarGrafico(resposta);
-
+                    let posicao = 1;
+                    for (let i = 0; i < resposta.length; i++) {
+                        document.getElementById("div_posicao").innerHTML += `
+                        <div class="posicao">
+                            <span>${posicao}º</span>
+                            <span ${resposta[i].fkUsuario == idUser ? 'id="meuUser"' : ''}>${resposta[i].nome}#${resposta[i].fkUsuario}</span>
+                            <span>${resposta[i].qtd_acertos}</span>
+                        </div><br>`
+                        posicao ++;
+                        if (resposta[i].fkUsuario == idUser) {
+                            sessionStorage.setItem("acertosUser", resposta[i].qtd_acertos);
+                            document.getElementById("meuUser").style.color = "#E63946";
+                        }
+                    }
+                    document.getElementById("qtd_user").innerHTML = resposta.length;
                 });
             } else {
                 console.error('Nenhum dado encontrado ou erro na API');
@@ -272,13 +286,13 @@
                 data: [],
                 fill: false,
                 borderWidth: 1,
-                borderColor: '#E98934',
-                backgroundColor: '#E98934'
+                borderColor: '#E63946',
+                backgroundColor: '#E63946'
             }]
         };
         let options = {
-            indexAxis: 'y',
-            responsive: true
+            responsive: true,
+            maintainAspectRatio: false
         };
 
         console.log('----------------------------------------------')
@@ -286,11 +300,11 @@
         console.log(resposta)
 
         // Inserindo valores recebidos em estrutura para plotar o gráfico
-        for (i = 0; i < resposta.length; i++) {
-            var registro = resposta[i];
-            labels.push(registro.nome);
-            dados.datasets[0].data.push(registro.qtd_acertos);
-        }
+            var registro = resposta[0];
+            labels.push(sessionStorage.NOME_USUARIO);
+            dados.datasets[0].data.push(sessionStorage.acertosUser);
+            labels.push('Média');
+            dados.datasets[0].data.push(resposta[0].media);
 
         console.log('----------------------------------------------')
         console.log('O gráfico será plotado com os respectivos valores:')

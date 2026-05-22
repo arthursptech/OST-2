@@ -21,7 +21,7 @@ header {
   position: sticky;
   z-index: 1000;
   top: 0;
-  background-color: black;
+  background-color: #121212;
   margin-top: 5px;
 }
 
@@ -42,7 +42,7 @@ header {
   height: 100%;
 }
 .musica span {
-  color:#761414;
+  color:#d2b48c;
   font-size: 20px;
 }
 
@@ -53,24 +53,24 @@ header {
 
 .musica a {
   text-decoration: none;
-  color: #761414;
+  color: #d2b48c;
   transition-duration: 0.6s;
 }
 .musica a:hover {
   text-decoration: none;
-  color: #e98934;
+  color: #E63946;
 }
 .musica i {
   margin-left: 2px;
   transition-duration: 0.3s;
 }
 .musica i:hover {
-  color: #e98934;
+  color: #E63946;
 }
 
 .header {
     height: var(--tamanho-header);
-    background-color: black;
+    background-color: #121212;
     font-family: "Montserrat", sans-serif;
 }
 
@@ -87,12 +87,12 @@ header {
 
 .header a {
   text-decoration: none;
-  color: #e43c3c;
+  color: #E63946;
 }
 
 .agora li{
   font-weight: 800;
-  color: #e43c3c;
+  color: #E63946;
 }
 
 .navbar {
@@ -101,11 +101,11 @@ header {
   align-items: center;
   justify-content: space-around;
   list-style: none;
-  color: #e43c3c;
+  color: #E63946;
 }
 
 .titulo {
-  color: #e98934;
+  color: #E63946;
   width: fit-content;
   font-weight: 500;
   text-transform: none;
@@ -114,7 +114,7 @@ header {
 }
 
 .agora {
-  color: #e43c3c;
+  color: #E63946;
 }
 .header h1 {
   margin: 0;
@@ -122,7 +122,7 @@ header {
 
 h2 {
   font-size: 30px;
-  color:#e98934;
+  color:#E63946;
 }
 
 .banner {

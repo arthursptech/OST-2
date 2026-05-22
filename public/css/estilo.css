@@ -10,7 +10,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Montserrat", sans-serif;
-  background-color: black;
+  background-color: #121212;
 }
 
 :root {
@@ -24,7 +24,7 @@ header {
   position: sticky;
   z-index: 1000;
   top: 0;
-  background-color: black;
+  background-color: #121212;
 }
 .container {
   display: flex;
@@ -43,7 +43,7 @@ header {
   height: 100%;
 }
 .musica span {
-  color:#761414;
+  color:#d2b48c;
   font-size: 20px;
 }
 
@@ -54,19 +54,19 @@ header {
 
 .musica a {
   text-decoration: none;
-  color: #761414;
+  color: #d2b48c;
   transition-duration: 0.6s;
 }
 .musica a:hover {
   text-decoration: none;
-  color: #e98934;
+  color: #E63946;
 }
 .musica i {
   margin-left: 2px;
   transition-duration: 0.3s;
 }
 .musica i:hover {
-  color: #e98934;
+  color: #E63946;
 }
 
 .header {
@@ -81,12 +81,12 @@ header {
 
 .header a {
   text-decoration: none;
-  color: #e43c3c;
+  color: #E63946;
 }
 
 .agora li{
   font-weight: 800;
-  color: #e43c3c;
+  color: #E63946;
 }
 
 .navbar {
@@ -95,17 +95,17 @@ header {
   align-items: center;
   justify-content: space-around;
   list-style: none;
-  color: #e43c3c;
+  color: #E63946;
 }
 
 .titulo {
-  color: #e98934;
+  color: #E63946;
   width: fit-content;
   font-weight: 500;
 }
 
 .agora {
-  color: #e43c3c;
+  color: #E63946;
 }
 .header h1 {
   margin: 0;
@@ -113,7 +113,7 @@ header {
 
 h2 {
   font-size: 30px;
-  color:#e98934;
+  color:#E63946;
 }
 
 /* Banner */
@@ -194,7 +194,7 @@ h2 {
 }
 
 .exemplo b {
-  color:#e43c3c;
+  color:#E63946;
 }
 
 .exemplo .container img {
@@ -214,11 +214,13 @@ h2 {
 
 .aqui {
   font-size: 13px;
-  color:#e98934;
+  color:#E63946;
   transition: 0.2s;
 }
 .aqui:hover {
-  color:#e43c3c
+  color:#f81b2d;
+  font-weight: 500;
+  font-size: 14px;
 }
 
 /* Valores */
@@ -259,12 +261,17 @@ h2 {
 
 /* FOOTER */
 
+
 .footer {
-  background-color: #761414;
+  background-color: #1e1e1e;
   height: 150px;
   color: #fff;
   display: flex;
   font-size: 15px;
+}
+
+.p5 {
+  background-color: #121212; 
 }
 
 .footer .container {
@@ -307,7 +314,7 @@ h2 {
 /* LOGIN */
 /* .loading {
   opacity: 1;
-  background-color: #0000000a;
+  background-color: #1212120a;
   z-index: 1000;
 } */
 
@@ -359,12 +366,12 @@ h2 {
 
 .card {
   width: 300px;
-  background: linear-gradient(180deg, white 50%, black 50%);
-  border: black 4px solid;
+  background: linear-gradient(180deg, white 50%, #121212 50%);
+  border: #121212 4px solid;
   display: flex;
   align-items: center;
   justify-content: space-evenly;
-  color:#e43c3c;
+  color:#E63946;
   flex-direction: column;
   height: fit-content;
   padding: 20px 20px;
@@ -375,7 +382,7 @@ h2 {
 .card h2:nth-of-type(1) {
   margin: 0;
   font-size: 40px;
-  color:black;
+  color:#121212;
   text-align: center;
   transform: translateY(-35%);
   font-family: 'Persona5font';
@@ -399,14 +406,14 @@ h2 {
 
 .formulario span {
   font-size: 40px;
-  color:black;
+  color:#121212;
   text-align: center;
   transform: translateY(-35%);
   font-family: 'Persona5font';
 }
 
 .formulario input {
-  border: 2px solid black;
+  border: 2px solid #121212;
   text-align: center;
   border-radius: 5px;
   margin: 0;
@@ -414,7 +421,7 @@ h2 {
 }
 
 .formulario select {
-  border: 2px solid #e98934;
+  border: 2px solid #E63946;
   background-color: white;
   color: gray;
   height: 36px;
@@ -436,7 +443,7 @@ h2 {
   border-radius: 5px;
   font-weight: 600;
   font-size: 18px;
-  color: black;
+  color: #121212;
   background-color: #ffffff;
   width: 120px;
   height: 30px;
@@ -456,7 +463,7 @@ h2 {
   background-color: rgba(0,0,0,0.75);
   justify-content: center;
   align-items: center;
-  color:#761414;
+  color:#E63946;
   font-size: 20px;
   font-family: Persona5;
 }
@@ -482,7 +489,7 @@ h2 {
 .card_erro {
   display: none;
   color: #fff;
-  background-color: black;
+  background-color: #121212;
   width: 230px;
   position: fixed;
   border-radius: 4px;
@@ -508,7 +515,7 @@ h2 {
 
 input {
   margin-bottom: 10px;
-  border: 2px solid #e98934;
+  border: 2px solid #E63;
   padding: 10px;
   text-align: center;
   border-radius: 10px;
@@ -596,5 +603,5 @@ iframe {
   width: 100%;
   height: 322px;
   border-radius: 32px;
-  border: #761414 1px groove;
+  border: #E63946 1px groove;
 }

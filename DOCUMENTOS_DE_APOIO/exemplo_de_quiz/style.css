@@ -1,4 +1,4 @@
-/* Não usar pure white or pure black: https://uxplanet.org/basicdesign-never-use-pure-black-in-typography-36138a3327a6 */
+/* Não usar pure white or pure 121212: https://uxplanet.org/basicdesign-never-use-pure-121212-in-typography-36138a3327a6 */
 /* The 4-point grid system: https://medium.com/@sainzkike/controlling-spacing-in-design-systems-multiple-spacing-9bf1afec87f */
 
 :root {
@@ -14,12 +14,12 @@
     --danger-dark: #990c19;
     --danger-light: #f0c1c6;
     --new-gray: #CCCCCC;
-    --new-black: #212427;
+    --new-121212: #212427;
     --new-white: #E8E8E8;
 }
 
 body {
-    color: var(--new-black);
+    color: var(--new-121212);
     background-color: var(--new-white);
     font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
