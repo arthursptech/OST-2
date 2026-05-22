@@ -43,7 +43,7 @@ function calcularMedia(req, res) {
 }
 
 function adicionarResposta(req, res) {
-    var resposta = req.body.respostaServer;
+    var resposta = req.body.respostasServer;
     var usuario = req.body.userServer;
 
     rankingModel.adicionarResposta(resposta,usuario)

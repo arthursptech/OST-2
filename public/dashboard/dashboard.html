@@ -84,7 +84,7 @@
                     </div>
                     <div class="item-regua perigo-quente">
                         <p>Seu score:</p>
-                        <p><span id="scoreUser">score</span>/10</p>
+                        <p><span id="scoreUser">0</span>/10</p>
                     </div>
                     <div class="item-regua ideal">
                         <p>Média de acertos</p>
@@ -238,6 +238,16 @@
     //     Se quiser alterar a busca, ajuste as regras de negócio em src/controllers
     //     Para ajustar o "select", ajuste o comando sql em src/models
     
+    let jsonVetor = [
+        {
+            
+        }
+    ]
+        for (let i = 0; i < vetor.length; i++) {
+            salvarResposta(fkPartida, i + 1, vetor[i], acertou )
+            
+        }
+
     function listaGrafico() {
 
         fetch("/ranking/listar", { cache: 'no-store' }).then(function (response) {
@@ -247,15 +257,16 @@
                     let posicao = 1;
                     for (let i = 0; i < resposta.length; i++) {
                         document.getElementById("div_posicao").innerHTML += `
-                        <div class="posicao">
+                        <div class="posicao" ${resposta[i].fkUsuario == idUser ? 'id="meuUser"' : ''}>
                             <span>${posicao}º</span>
-                            <span ${resposta[i].fkUsuario == idUser ? 'id="meuUser"' : ''}>${resposta[i].nome}#${resposta[i].fkUsuario}</span>
+                            <span ${resposta[i].fkUsuario == idUser ? 'id="minhaCor"' : ''}>${resposta[i].nome}#${resposta[i].fkUsuario}</span>
                             <span>${resposta[i].qtd_acertos}</span>
                         </div><br>`
                         posicao ++;
                         if (resposta[i].fkUsuario == idUser) {
                             sessionStorage.setItem("acertosUser", resposta[i].qtd_acertos);
-                            document.getElementById("meuUser").style.color = "#E63946";
+                            document.getElementById("meuUser").style.backgroundColor = "#E63946";
+                            document.getElementById("minhaCor").innerHTML = "Você";
                         }
                     }
                     document.getElementById("qtd_user").innerHTML = resposta.length;

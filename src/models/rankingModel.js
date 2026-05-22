@@ -28,10 +28,23 @@ function calcularMedia() {
 function adicionarResposta(resposta, usuario) {
     var instrucaoSql = `
     INSERT INTO respostasUser (fkAlternativa, fkUsuario) VALUES
-    (${resposta}, ${usuario});`;
+    (${resposta[0]}, ${usuario}),
+    (${resposta[1]}, ${usuario}),
+    (${resposta[2]}, ${usuario}),
+    (${resposta[3]}, ${usuario}),
+    (${resposta[4]}, ${usuario}),
+    (${resposta[5]}, ${usuario}),
+    (${resposta[6]}, ${usuario}),
+    (${resposta[7]}, ${usuario}),
+    (${resposta[8]}, ${usuario}),
+    (${resposta[9]}, ${usuario});`;
 
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);
+}
+
+function atualizarResposta(resposta, usuario) {
+    
 }
 
 function somarAcertos(idUsuario) {

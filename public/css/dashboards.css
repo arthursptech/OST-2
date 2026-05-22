@@ -129,7 +129,6 @@ body {
   background-color: #161618;
   height: 100vh;
   overflow: auto;
-  padding-top: 10vh;
 }
 
 .area-parametros-alerta {
@@ -181,7 +180,7 @@ body {
   flex-direction: row;
 }
 .dash .ranking-graph {
-  width: 36vw;
+  width: 35.5vw;
   display: flex;
   justify-content: space-evenly;
   flex-direction: column;
@@ -189,9 +188,15 @@ body {
   margin-left: 5vw;
   border: groove 3px #E63946;
   min-height: 40vh;
+  max-height: 40vh;
   height: fit-content;
   margin-top: 5vh;
   background-color: #121212;
+  overflow: auto;
+  scrollbar-color: #E63946 #fff;
+  scrollbar-width: none;
+  gap: 5px;
+  padding: 5px;
 }
 
 .dash .ranking-avg-graph {
@@ -462,6 +467,18 @@ canvas {
   border: white 5px;
   border-style:double;
   font-family:Verdana, Geneva, Tahoma, sans-serif;
+  margin-trim:in-flow;
+}
+
+.verifResul {
+  font-size: 15px;
+  padding: 2vh 0 0 0;
+  text-decoration: underline;
+  color: #fff;
+  transition: 0.2s;
+}
+.verifResul:hover {
+  color: #E63946;
 }
 
 .question {

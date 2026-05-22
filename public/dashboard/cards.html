@@ -20,7 +20,7 @@
         rel="stylesheet">
 </head>
 
-<body onload="validarSessao(), esconderQuiz()">
+<body onload="validarSessao(), esconderQuiz(), salvarAcertos()">
 
     <div class="janela">
 
@@ -62,6 +62,7 @@
         <div class="inicio" id="iniciarBotao">
             <span>INICIAR QUIZ</span>
             <button onclick="iniciarQuiz()" class="botao">Iniciar</button>
+
         </div>
 
         <div class="body" id="main">
@@ -204,7 +205,7 @@
 
             <div class="question" id="Q5">
                 <span>Questão 5 - De onde é essa OST?</span>
-                <audio controls src="" id="A5"></audio>
+                <audio controls src="../assets/audio/time.mov" id="A5"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -236,7 +237,7 @@
 
             <div class="question" id="Q6">
                 <span>Questão 6 - De onde é essa OST?</span>
-                <audio controls src="" id="A6"></audio>
+                <audio controls src="../assets/audio/song_ancients.mov" id="A6"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -268,7 +269,7 @@
 
             <div class="question" id="Q7">
                 <span>Questão 7 - De onde é essa OST?</span>
-                <audio controls src="" id="A7"></audio>
+                <audio controls src="../assets/audio/who_will_know.mov" id="A7"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -409,13 +410,16 @@
 
 <script>
     b_id.innerHTML = sessionStorage.ID_USUARIO;
+    let idUser = sessionStorage.ID_USUARIO;
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
 
+    // Vetor com as respostas do usuário
+    let respostasVetor = [];
     function finalizarQuiz() {
         let questaoAtual = document.getElementById('Q10');
         let radio = questaoAtual.querySelector('[type="radio"]:checked');
         let respostaUser = radio.id;
-
+        respostasVetor.push(respostaUser);
         // Enviando a resposta da última questão
         fetch("/ranking/quiz", {
             method: "POST",
@@ -423,7 +427,7 @@
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                respostaServer: respostaUser,
+                respostasServer: respostasVetor,
                 userServer: sessionStorage.ID_USUARIO
             }),
         })
@@ -463,6 +467,13 @@
     }
 
     function esconderQuiz() {
+        setTimeout(() => {
+            if (sessionStorage.acertosUser >= 0) {
+                iniciarBotao.innerHTML += `<br>
+                <a class="verifResul" href="./dashboard.html">Verificar meu resultado</a>`
+            }
+        }, 1000);
+        
         for (let i = 1; i <= 10; i++) {
             document.getElementById(`Q${i}`).style.display = "none";
         }
@@ -471,46 +482,54 @@
     }
 
     function iniciarQuiz() {
+        respostasVetor = [];
         document.getElementById('Q1').style.display = "flex";
         document.getElementById('main').style.display = "flex";
         document.getElementById('iniciarBotao').style.display = "none";
+
     }
     
     function mudarQuestao(questao) {
         var musica = document.getElementById(`A${questao - 1}`)
         musica.volume = 0.4;
         musica.pause();
+
+
         let questaoAtual = document.getElementById(`Q${questao - 1}`);
         let radio = questaoAtual.querySelector('[type="radio"]:checked');
         let respostaUser = radio.id;
 
-        // Enviando a resposta da questão atual
-        fetch("/ranking/quiz", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                respostaServer: respostaUser,
-                userServer: sessionStorage.ID_USUARIO
-            }),
-        })
-        .then(function (resposta){
-            console.log("resposta: ", resposta);
+        respostasVetor.push(respostaUser);
+        console.log(respostasVetor)
 
-            if (resposta.ok) {
-                console.log("resposta está ok");
-                document.getElementById(`Q${questao}`).style.display = "flex";
-                document.getElementById(`Q${questao - 1}`).style.display = "none";
-                if (questao == 10) {
-                    document.getElementById("div_botao").style.display = "flex";
-                }
-            } else {
-                console.log("Houve um erro ao registrar a resposta do usuário");
-                window.location = "cards.html";
-            }
-        });
+        document.getElementById(`Q${questao}`).style.display = "flex";
+        document.getElementById(`Q${questao - 1}`).style.display = "none";
+        if (questao == 10) {
+            document.getElementById("div_botao").style.display = "flex";
+        }
+            
     }
+
+    // fetch("/ranking/quiz", {
+    //         method: "POST",
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //         },
+    //         body: JSON.stringify({
+    //             respostaServer: respostaUser,
+    //             userServer: sessionStorage.ID_USUARIO
+    //         }),
+    //     })
+    //     .then(function (resposta){
+    //         console.log("resposta: ", resposta);
+
+    //         if (resposta.ok) {
+    //             console.log("resposta está ok");
+    //         } else {
+    //             console.log("Houve um erro ao registrar a resposta do usuário");
+    //             window.location = "cards.html";
+    //         }
+    //     });
 
     function desmarcarRadio() {
         const options = document.getElementsByClass("choices");
@@ -518,6 +537,27 @@
             options[i].checked = false;
             
         }
+    }   
+
+    function salvarAcertos() {
+
+        fetch("/ranking/listar", { cache: 'no-store' }).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (resposta) {
+                    console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
+                    for (let i = 0; i < resposta.length; i++) {
+                        if (resposta[i].fkUsuario == idUser) {
+                            sessionStorage.setItem("acertosUser", resposta[i].qtd_acertos);
+                        }
+                    }
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+            }
+        })
+            .catch(function (error) {
+                console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+            });
     }
 </script>
 
