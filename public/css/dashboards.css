@@ -217,6 +217,7 @@ body {
 }
 
 .ranking-attempt-graph {
+  width: calc(23vw - 10px);
   justify-content: start;
   font-size: 25px;
   color: #E63946;

@@ -40,14 +40,14 @@
             </div>
 
             <div class="btn-nav-white">
-                <a href="./dashboard.html">
+                <a href="javascript:void(0)" onclick="verificarQuiz()">
                     <h3>Ranking</h3>
                 </a>
             </div>
 
             <div class="btn-nav-white">
                 <a href="./mural.html">
-                    <h3>Mural de mensagens</h3>
+                    <h3>Fórum</h3>
                 </a>
             </div>
 
@@ -127,4 +127,11 @@
         });
     }
 
+    function verificarQuiz() {
+        if (sessionStorage.acertosUser >= 0) {
+            window.location = "/dashboard.html";
+        } else {
+            window.alert("É necessário realizar o quiz para ter acesso a página de Ranking")
+        }
+    }
 </script>
