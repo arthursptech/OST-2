@@ -66,6 +66,12 @@
         </div>
 
         <div class="body" id="main">
+            <div id="div_aguardar" class="loading-div">
+                <img src="../assets/imgs/simon-gurren-laggan.gif" id="loading-gif">
+                <br>
+                <p>Redirecionando...</p>
+            </div>
+
             <div class="question" id="Q1">
                 <span>Questão 1 - De onde é essa OST?</span>
                 <audio controls src="https://codehs.com/uploads/8fbd34850563b0d73ff295de1869ad65" id="A1" class="musicaQuiz"></audio>
@@ -301,7 +307,7 @@
 
             <div class="question" id="Q8">
                 <span>Questão 8 - De onde é essa OST?</span>
-                <audio controls src="" id="A8"></audio>
+                <audio controls src="../assets/audio/zoltraak.mov" id="A8"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -333,7 +339,7 @@
 
             <div class="question" id="Q9">
                 <span>Questão 9 - De onde é essa OST?</span>
-                <audio controls src="" id="A9"></audio>
+                <audio controls src="../assets/audio/outer_wilds.mov" id="A9"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -365,7 +371,7 @@
 
             <div class="question" id="Q10">
                 <span>Questão 10 - De onde é essa OST?</span>
-                <audio controls src="" id="A10"></audio>
+                <audio controls src="../assets/audio/somnus.mov" id="A10"></audio>
                 <div class="container-question">
                     <div class="container-choice">
                         <div class="choices">
@@ -416,6 +422,7 @@
     // Vetor com as respostas do usuário
     let respostasVetor = [];
     function finalizarQuiz() {
+        aguardar()
         let questaoAtual = document.getElementById('Q10');
         let radio = questaoAtual.querySelector('[type="radio"]:checked');
         let respostaUser = radio.id;

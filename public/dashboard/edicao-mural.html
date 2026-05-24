@@ -47,7 +47,7 @@
 
             <div class="btn-nav-white">
                 <a href="./mural.html">
-                    <h3>Mural de Avisos</h3>
+                    <h3>Mural de mensagens</h3>
                 </a>
             </div>
 
@@ -59,9 +59,9 @@
 
         <div class="dash-right">
 
-            <div class="avisos">
+            <div class="mensagens">
                 <div class="container">
-                    <h1>Editar um aviso</h1>
+                    <h1>Editar um mensagem</h1>
                     <div class="div-form">
                         <label>
                             ID:
@@ -104,7 +104,7 @@
     }
 
     function editar() {
-        fetch(`/avisos/editar/${sessionStorage.getItem("ID_POSTAGEM_EDITANDO")}`, {
+        fetch(`/mensagens/editar/${sessionStorage.getItem("ID_POSTAGEM_EDITANDO")}`, {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"

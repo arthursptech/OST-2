@@ -19,10 +19,6 @@ router.post("/quiz", function(req,res) {
     rankingController.adicionarResposta(req,res);
 })
 
-router.post("/soma", function(req,res) {
-    rankingController.somarAcertos(req,res);
-})
-
 router.get("/score/:id", function(req,res) {
     rankingController.buscarScore(req,res);
 })
@@ -30,4 +26,13 @@ router.get("/score/:id", function(req,res) {
 router.get("/buscar/topOst", function(req,res) {
     rankingController.buscarTopOst(req,res);
 })
+
+router.get("/tentativa/:id", function(req,res) {
+    rankingController.buscarTentativa(req,res);
+})
+
+router.get("/tentativa/graph/:id", function(req,res) {
+    rankingController.buscarGrafico(req,res);
+})
+
 module.exports = router;

@@ -25,40 +25,27 @@ function calcularMedia() {
     return database.executar(instrucaoSql);
 }
 
-function adicionarResposta(resposta, usuario) {
+function adicionarResposta(resposta, usuario, tentativa) {
     var instrucaoSql = `
-    INSERT INTO respostasUser (fkAlternativa, fkUsuario) VALUES
-    (${resposta[0]}, ${usuario}),
-    (${resposta[1]}, ${usuario}),
-    (${resposta[2]}, ${usuario}),
-    (${resposta[3]}, ${usuario}),
-    (${resposta[4]}, ${usuario}),
-    (${resposta[5]}, ${usuario}),
-    (${resposta[6]}, ${usuario}),
-    (${resposta[7]}, ${usuario}),
-    (${resposta[8]}, ${usuario}),
-    (${resposta[9]}, ${usuario});`;
+    INSERT INTO respostasUser (fkAlternativa, fkUsuario, fkTentativa) VALUES
+    (${resposta[0]}, ${usuario}, ${tentativa}),
+    (${resposta[1]}, ${usuario}, ${tentativa}),
+    (${resposta[2]}, ${usuario}, ${tentativa}),
+    (${resposta[3]}, ${usuario}, ${tentativa}),
+    (${resposta[4]}, ${usuario}, ${tentativa}),
+    (${resposta[5]}, ${usuario}, ${tentativa}),
+    (${resposta[6]}, ${usuario}, ${tentativa}),
+    (${resposta[7]}, ${usuario}, ${tentativa}),
+    (${resposta[8]}, ${usuario}, ${tentativa}),
+    (${resposta[9]}, ${usuario}, ${tentativa});`;
 
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);
 }
 
-function atualizarResposta(resposta, usuario) {
-    
-}
-
-function somarAcertos(idUsuario) {
+function adicionarTentativa(usuario) {
     var instrucaoSql = `
-    INSERT INTO ranking (qtd_acertos, fkUsuario)
-    SELECT 
-        SUM(CASE
-        WHEN a.tipo = 1 THEN 1 ELSE 0
-        END) AS qtd_acertos,
-        ru.fkUsuario
-    FROM respostasUser ru
-    JOIN alternativas a ON ru.fkAlternativa = a.id
-    WHERE ru.fkUsuario = ${idUsuario}
-    GROUP BY ru.fkUsuario;`
+    INSERT INTO tentativas (fkUsuario) VALUES (${usuario});`;
 
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);
@@ -92,12 +79,42 @@ function buscarTopOst() {
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
     return database.executar(instrucaoSql);
 }
+
+function buscarTentativa(idUsuario) {
+    var instrucaoSql = `
+    SELECT DATE_FORMAT(MAX(dtHrRegistro),'%d/%m/%Y') dtTentativa,
+    COUNT(*) tentativaAtual
+    FROM tentativas WHERE fkUsuario = ${idUsuario}
+    GROUP BY fkUsuario
+    LIMIT 1;`
+
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
+function buscarGrafico(idUsuario) {
+    var instrucaoSql = `
+    SELECT COUNT(*) qtd_acertos, ru.fkUsuario userId, DATE_FORMAT(dtHrRegistro,'%d/%m/%Y') dtTentativa
+    FROM respostasUser ru
+    JOIN alternativas a ON fkAlternativa = a.id
+    JOIN usuario u ON ru.fkUsuario = u.id
+    JOIN tentativas t ON ru.fkTentativa = idTentativa
+    WHERE tipo = 1 AND ru.fkUsuario = ${idUsuario}
+    GROUP BY ru.fkUsuario, fkTentativa, dtHrRegistro
+    ORDER BY dtHrRegistro ASC;`
+
+    console.log("Executando a instrução SQL: \n" + instrucaoSql);
+    return database.executar(instrucaoSql);
+}
+
 module.exports = {
     buscarTopUsuario,
     buscarRanking,
     calcularMedia,
     adicionarResposta,
-    somarAcertos,
+    adicionarTentativa,
     buscarScore,
-    buscarTopOst
+    buscarTopOst,
+    buscarTentativa,
+    buscarGrafico
 };

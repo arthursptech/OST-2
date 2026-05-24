@@ -42,44 +42,34 @@ function calcularMedia(req, res) {
     });
 }
 
-function adicionarResposta(req, res) {
+async function adicionarResposta(req, res) {
     var resposta = req.body.respostasServer;
     var usuario = req.body.userServer;
 
-    rankingModel.adicionarResposta(resposta,usuario)
-        .then(function (resultado) {
-        if (resultado.length > 0) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(204).send("Nenhum resultado encontrado!")
-        }
-    }).catch(function (erro) {
+    if (usuario.length < 0 || resposta.length < 0) {
+        return res.status(400).send("Dados inválidos")
+    }
+    try {
+        var result = await rankingModel.adicionarTentativa(usuario);
+        
+        var tentativaId = result.insertId;
+
+        await rankingModel.adicionarResposta(resposta, usuario, tentativaId)
+
+        res.status(200).json({
+            ok_sql: "Ambas funções funcionaram: alternativa e resposta",
+            tentativa: tentativaId 
+        });
+    } catch (erro) {
         console.log(erro);
         console.log("Houve um erro ao adicionar os dados do quiz: ", erro.sqlMessage);
         res.status(500).json(erro.sqlMessage);
-    });
+    };
 }
 
-function somarAcertos(req,res) {
-    var usuario = req.body.userServer;
-
-    rankingModel.somarAcertos(usuario)
-        .then(function (resultado) {
-        if (resultado.length > 0) {
-            res.status(200).json(resultado);
-        } else {
-            res.status(204).send("Nenhum resultado encontrado!")
-        }
-    }).catch(function (erro) {
-        console.log(erro);
-        console.log("Houve um erro ao buscar os dados do quiz do usuário: ", erro.sqlMessage);
-        res.status(500).json(erro.sqlMessage);
-    });
-}
-
-function buscarScore(req,res) {
+function buscarScore(req, res) {
     console.log(req.params.id);
-    
+
     rankingModel.buscarScore(req.params.id)
         .then(resultado => {
             res.json(resultado);
@@ -88,7 +78,7 @@ function buscarScore(req,res) {
         })
 }
 
-function buscarTopOst(req,res) {
+function buscarTopOst(req, res) {
     rankingModel.buscarTopOst().then(function (resultado) {
         if (resultado.length > 0) {
             res.status(200).json(resultado);
@@ -101,12 +91,46 @@ function buscarTopOst(req,res) {
         res.status(500).json(erro.sqlMessage);
     });
 }
+
+function buscarTentativa(req, res) {
+    var idUsuario = req.params.id;
+
+    rankingModel.buscarTentativa(idUsuario).then(function (resultado) {
+        if (resultado.length > 0) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(204).send("Nenhum resultado encontrado!")
+        }
+    }).catch(function (erro) {
+        console.log(erro);
+        console.log("Houve um erro ao buscar os dados sobre as tentativas: ", erro.sqlMessage);
+        res.status(500).json(erro.sqlMessage);
+    });
+}
+
+function buscarGrafico(req,res) {
+    var idUsuario = req.params.id;
+
+    rankingModel.buscarGrafico(idUsuario).then(function (resultado) {
+        if (resultado.length > 0) {
+            res.status(200).json(resultado);
+        } else {
+            res.status(204).send("Nenhum resultado encontrado!")
+        }
+    }).catch(function (erro) {
+        console.log(erro);
+        console.log("Houve um erro ao buscar o gráfico sobre as tentativas: ", erro.sqlMessage);
+        res.status(500).json(erro.sqlMessage);
+    });
+}
+
 module.exports = {
     buscarTopUsuario,
     buscarRanking,
     calcularMedia,
     adicionarResposta,
-    somarAcertos,
     buscarScore,
-    buscarTopOst
+    buscarTopOst,
+    buscarTentativa,
+    buscarGrafico
 }

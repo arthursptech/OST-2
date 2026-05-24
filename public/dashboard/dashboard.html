@@ -28,7 +28,7 @@
 
 <!-- <body onload=" atualizarFeed()"> -->
 
-<body onload="validarSessao(), listarTop(), listarMedia(), listaGrafico(), buscarScore(), buscarTopOst()">
+<body onload="validarSessao(), listarTop(), listarMedia(), listarGrafico(), buscarScore(), buscarTopOst(), listarGraphTentativas()">
 
     <div class="janela">
         <div class="header-left">
@@ -83,14 +83,14 @@
                         <p id="qtd_user">qtd_user</p>
                     </div>
                     <div class="item-regua perigo-quente">
-                        <p>Seu score:</p>
+                        <p>Seu<br>score:</p>
                         <p><span id="scoreUser">0</span>/10</p>
                     </div>
                     <div class="item-regua ideal">
                         <p>Média de acertos</p>
                         <p> <span id="media">media</span>/10</p>
                     </div>
-                    
+            
                 </div>
             </div>
 
@@ -106,7 +106,17 @@
                     <br>
                 </div>
                 <div class="ranking-avg-graph">
-                    <canvas id="graficos"></canvas>
+                    <canvas id="grafico-media"></canvas>
+                </div>
+            </div>
+
+            <div class="graphs-line">
+                <div class="ranking-graph">
+                    <canvas id="graph-attempt"></canvas>
+                </div>
+                <div class="ranking-attempt-graph">
+                    <span>Tentativas:</span>
+                    <span id="datas"></span>
                 </div>
             </div>
         </div>
@@ -121,26 +131,9 @@
     b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
     b_id.innerHTML = sessionStorage.ID_USUARIO
     let idUser = sessionStorage.ID_USUARIO;
-    const ranking = document.getElementById('graficos');
+    const ranking = document.getElementById('grafico-media');
     Chart.defaults.color = '#FFF';
     Chart.defaults.font.size = 16;
-    // new Chart(ranking, {
-    //     type: 'bar',
-    //     data: {
-    //         labels: ['Arthur', 'Ana', 'Caio', 'Felipe', 'Guilherme', 'Gustavo', 'Marcus'],
-    //         datasets: [{
-    //             label: 'Acertos',
-    //             data: [10, 7, 6, 3, 5, 8, 4],
-    //             borderWidth: 1,
-    //             backgroundColor: '#E63946',
-    //             borderColor: '#E63946'
-    //         }]
-    //     },
-    //     options: {
-    //         indexAxis: 'y',
-    //         responsive: true
-    //     }
-    // });
 
     function listarTop() {
         fetch("/ranking/buscar").then(function (resposta) {
@@ -237,18 +230,8 @@
 
     //     Se quiser alterar a busca, ajuste as regras de negócio em src/controllers
     //     Para ajustar o "select", ajuste o comando sql em src/models
-    
-    let jsonVetor = [
-        {
-            
-        }
-    ]
-        for (let i = 0; i < vetor.length; i++) {
-            salvarResposta(fkPartida, i + 1, vetor[i], acertou )
-            
-        }
 
-    function listaGrafico() {
+    function listarGrafico() {
 
         fetch("/ranking/listar", { cache: 'no-store' }).then(function (response) {
             if (response.ok) {
@@ -259,17 +242,35 @@
                         document.getElementById("div_posicao").innerHTML += `
                         <div class="posicao" ${resposta[i].fkUsuario == idUser ? 'id="meuUser"' : ''}>
                             <span>${posicao}º</span>
-                            <span ${resposta[i].fkUsuario == idUser ? 'id="minhaCor"' : ''}>${resposta[i].nome}#${resposta[i].fkUsuario}</span>
+                            <span>${resposta[i].nome}#${resposta[i].fkUsuario}</span>
                             <span>${resposta[i].qtd_acertos}</span>
                         </div><br>`
                         posicao ++;
                         if (resposta[i].fkUsuario == idUser) {
                             sessionStorage.setItem("acertosUser", resposta[i].qtd_acertos);
                             document.getElementById("meuUser").style.backgroundColor = "#E63946";
-                            document.getElementById("minhaCor").innerHTML = "Você";
                         }
                     }
                     document.getElementById("qtd_user").innerHTML = resposta.length;
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+            }
+        })
+            .catch(function (error) {
+                console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+            });
+    }
+
+    function listarGraphTentativas() {
+        fetch(`/ranking/tentativa/graph/${idUser}`, { cache: 'no-store' }).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (resposta) {
+                    console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
+                    
+        
+                    plotarGraficoTentativa(resposta);
+
                 });
             } else {
                 console.error('Nenhum dado encontrado ou erro na API');
@@ -334,7 +335,86 @@
 
         // Adicionando gráfico criado em div na tela
         let myChart = new Chart(
-            document.getElementById('graficos'),
+            document.getElementById('grafico-media'),
+            config
+        );
+    }
+
+    function plotarGraficoTentativa(resposta) {
+
+        console.log('iniciando plotagem do gráfico...');
+
+        // Criando estrutura para plotar gráfico - labels
+        let labels = [];
+
+        // Criando estrutura para plotar gráfico - dados
+        let dados = {
+            labels: labels,
+            datasets: [{
+                label: 'Acertos',
+                data: [],
+                fill: false,
+                borderWidth: 1,
+                borderColor: '#E63946',
+                backgroundColor: '#E63946'
+            }]
+        };
+        let options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    offset: true
+                },
+                y: {
+                    offset: true,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    beginAtZero: false,
+                    grid: {
+                        display: true,
+                        color: '#d2b48c',
+                        lineWidth: 0.3
+                    }
+                }
+            }
+        };
+
+        console.log('----------------------------------------------')
+        console.log('Estes dados foram recebidos pela funcao "obterDadosGrafico" e passados para "plotarGrafico":')
+        console.log(resposta)
+
+        // Inserindo valores recebidos em estrutura para plotar o gráfico
+            
+            for (let i = 0; i < resposta.length; i++) {
+                var registro = resposta[i];
+                labels.push(`Tentativa ${i + 1}`);
+                dados.datasets[0].data.push(registro.qtd_acertos);
+
+                datas.innerHTML += `
+                Tentativa ${i + 1}: <span class="data">${registro.dtTentativa}</span><br>`
+                
+            }
+
+        console.log('----------------------------------------------')
+        console.log('O gráfico será plotado com os respectivos valores:')
+        console.log('Labels:')
+        console.log(labels)
+        console.log('Dados:')
+        console.log(dados.datasets)
+        console.log('----------------------------------------------')
+
+        // Criando estrutura para plotar gráfico - config
+        const config = {
+            type: 'line',
+            data: dados,
+            options: options
+        };
+
+        // Adicionando gráfico criado em div na tela
+        let myChart = new Chart(
+            document.getElementById('graph-attempt'),
             config
         );
     }
