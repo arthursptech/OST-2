@@ -220,7 +220,8 @@ h2 {
 .aqui:hover {
   color:#f81b2d;
   font-weight: 500;
-  font-size: 14px;
+  transform: scale(1.1);
+  display: inline-block;
 }
 
 /* Valores */
@@ -604,4 +605,105 @@ iframe {
   height: 322px;
   border-radius: 32px;
   border: #E63946 1px groove;
+}
+
+/* Project Hail Mary Page */
+
+.background-phm {
+  width: 100%;
+  height: 100%;
+  background-image:url("../assets/imgs/phm.webp");
+  background-size: cover;
+}
+
+.background-phm img {
+  width: 480px;
+  height: 240px;
+
+}
+.background-phm .sobre {
+  background-color: rgba(0,0,0,0.75);
+  color:#E63946;
+}
+.background-phm p {
+  color: white;
+  max-width: 600px;
+  line-height: 1.6;
+  text-align: left;
+  font-size: 17px;
+}
+
+.background-phm .box img {
+  width: 100%;
+  height: 322px;
+  border-radius: 32px;
+  border: none;
+  cursor: pointer;
+}
+
+.justificativa {
+    display: flex;
+    color:#E63946;
+    background-color: rgba(0,0,0,0.75);
+}
+
+.justificativa .container{
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.background-phm .saber-mais {
+  margin-top: 1vh;
+  font-size: 13px;
+  max-width: 200px;
+  color: #d2b48c;
+}
+.background-phm a {
+  color:#d2b48c;
+}
+
+.botao-home {
+  border: 1px solid transparent;
+  border-radius: 5px;
+  margin: 2px;
+  background-color: #E63946;
+  color: #fff;
+  font-size: 15px;
+  padding: 5px 25px;
+  cursor:pointer;
+  transition: 0.3s ease;
+  margin-top: 2vh;
+  margin-bottom: 2vh;
+}
+
+.botao-home:hover {
+background-color: #f81b2d;
+}
+
+/* TTGL Page */
+
+.background-ttgl {
+  width: 100%;
+  height: 100%;
+  background-image:url("../assets/imgs/background_ttgl.jpg");
+  background-size: cover;
+}
+
+.background-ttgl .sobre {
+  background-color: rgba(0,0,0,0.75);
+  color: #E63946;
+}
+
+.background-ttgl img {
+  width: 480px;
+  height: 240px;
+}
+
+.background-ttgl p {
+  color: white;
+  max-width: 600px;
+  line-height: 1.6;
+  text-align: left;
+  font-size: 17px;
 }
