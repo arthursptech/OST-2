@@ -258,55 +258,6 @@ body {
   color: white;
 }
 
-.card-aquario h1 {
-  width: fit-content;
-}
-
-.card-aquario p {
-  margin: 0;
-  font-size: 50px;
-  font-weight: lighter;
-  text-align: left;
-}
-
-.desc-aquario {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  width: 100%;
-}
-
-.desc-aquario .cor-alerta {
-  width: 30px;
-}
-
-.title-aquario {
-  width: 100%;
-}
-
-
-.cards h1 {
-  font-size: 22px;
-  border-bottom: solid white 1px;
-  text-align: left;
-  font-weight: lighter;
-  margin: 20px;
-}
-
-.temperatura,
-.umidade {
-  margin: 5px;
-  margin-left: 20px;
-  width: 75%;
-}
-
-.cor-alerta {
-  width: 13%;
-  height: 30%;
-  border-radius: 50%;
-  display: inline-block;
-}
-
 .graph {
   width: 70%;
   margin: auto;

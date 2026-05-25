@@ -94,8 +94,6 @@
                 </div>
             </div>
 
-            <!-- <div class="btns-dash" id="btnAquario">
-            </div> -->
             <div class="graphs-line">
                 <div class="ranking-graph" id="div_posicao">
                     <div class="posicao" id="titulos">
@@ -187,50 +185,7 @@
         })
     }
 
-    // function exibirAquario(idAquario) {
-    //     let todosOsGraficos = JSON.parse(sessionStorage.AQUARIOS);
-
-    //     for (i = 0; i < todosOsGraficos.length; i++) {
-    //         // exibindo - ou não - o gráfico
-    //         if (todosOsGraficos[i].id != idAquario) {
-    //             let elementoAtual = document.getElementById(`grafico${todosOsGraficos[i].id}`)
-    //             if (elementoAtual.classList.contains("display-block")) {
-    //                 elementoAtual.classList.remove("display-block")
-    //             }
-    //             elementoAtual.classList.add("display-none")
-
-    //             // alterando estilo do botão
-    //             let btnAtual = document.getElementById(`btnAquario${todosOsGraficos[i].id}`)
-    //             if (btnAtual.classList.contains("btn-pink")) {
-    //                 btnAtual.classList.remove("btn-pink")
-    //             }
-    //             btnAtual.classList.add("btn-white")
-    //         }
-    //     }
-
-    //     // exibindo - ou não - o gráfico
-    //     let graficoExibir = document.getElementById(`grafico${idAquario}`)
-    //     graficoExibir.classList.remove("display-none")
-    //     graficoExibir.classList.add("display-block")
-
-    //     // alterando estilo do botão
-    //     let btnExibir = document.getElementById(`btnAquario${idAquario}`)
-    //     btnExibir.classList.remove("btn-white")
-    //     btnExibir.classList.add("btn-pink")
-    // }
-
-    // O gráfico é construído com três funções:
-    // 1. obterDadosGrafico -> Traz dados do Banco de Dados para montar o gráfico da primeira vez
-    // 2. plotarGrafico -> Monta o gráfico com os dados trazidos e exibe em tela
-    // 3. atualizarGrafico -> Atualiza o gráfico, trazendo novamente dados do Banco
-
-    // Esta função *obterDadosGrafico* busca os últimos dados inseridos em tabela de medidas.
-    // para, quando carregar o gráfico da primeira vez, já trazer com vários dados.
-    // A função *obterDadosGrafico* também invoca a função *plotarGrafico*
-
-    //     Se quiser alterar a busca, ajuste as regras de negócio em src/controllers
-    //     Para ajustar o "select", ajuste o comando sql em src/models
-
+   
     function listarGrafico() {
 
         fetch("/ranking/listar", { cache: 'no-store' }).then(function (response) {

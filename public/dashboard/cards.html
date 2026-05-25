@@ -517,27 +517,6 @@
             
     }
 
-    // fetch("/ranking/quiz", {
-    //         method: "POST",
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //         },
-    //         body: JSON.stringify({
-    //             respostaServer: respostaUser,
-    //             userServer: sessionStorage.ID_USUARIO
-    //         }),
-    //     })
-    //     .then(function (resposta){
-    //         console.log("resposta: ", resposta);
-
-    //         if (resposta.ok) {
-    //             console.log("resposta está ok");
-    //         } else {
-    //             console.log("Houve um erro ao registrar a resposta do usuário");
-    //             window.location = "cards.html";
-    //         }
-    //     });
-
     function desmarcarRadio() {
         const options = document.getElementsByClass("choices");
         for (let i = 0; i < options.length; i++) {
@@ -569,7 +548,7 @@
 
     function verificarQuiz() {
         if (sessionStorage.acertosUser >= 0) {
-            window.location = "/dashboard.html";
+            window.location = "./dashboard.html";
         } else {
             window.alert("É necessário realizar o quiz para ter acesso a página de Ranking")
         }
