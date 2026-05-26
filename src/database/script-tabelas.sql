@@ -1,11 +1,3 @@
--- Arquivo de apoio, caso você queira criar tabelas como as aqui criadas para a API funcionar.
--- Você precisa executar os comandos no banco de dados para criar as tabelas,
--- ter este arquivo aqui não significa que a tabela em seu BD estará como abaixo!
-
-/*
-comandos para mysql server
-*/
-
 CREATE DATABASE ost;
 
 USE ost;
@@ -111,32 +103,34 @@ INSERT INTO alternativas (titulo, origem, tipo, fkPergunta) VALUES
 (null, 'Steins;Gate', 0, 10),
 (null, 'Hello Charlotte', 0, 10);
 
-select * from usuario;
-INSERT INTO ranking (qtd_acertos, fkUsuario)
-SELECT 
-    COUNT(a.id) AS qtd_acertos,
-    ru.fkUsuario
-FROM respostasUser ru
-JOIN alternativas a ON ru.fkAlternativa = a.id
-WHERE ru.fkUsuario = 4 AND a.tipo = 1
-GROUP BY ru.fkUsuario;
+-- Alguns dos INSERTs e SELECTs utilizados na API
+
+-- select * from usuario;
+-- INSERT INTO ranking (qtd_acertos, fkUsuario)
+-- SELECT 
+--     COUNT(a.id) AS qtd_acertos,
+--     ru.fkUsuario
+-- FROM respostasUser ru
+-- JOIN alternativas a ON ru.fkAlternativa = a.id
+-- WHERE ru.fkUsuario = 4 AND a.tipo = 1
+-- GROUP BY ru.fkUsuario;
 
 
--- Insert da questao, alternativa, e do usuario na tabela de respostas do Usuário
-INSERT INTO respostasUser (fkAlternativa, fkUsuario) VALUES;
+-- -- Insert da questao, alternativa, e do usuario na tabela de respostas do Usuário
+-- INSERT INTO respostasUser (fkAlternativa, fkUsuario) VALUES;
 
--- Desconhecido
-select questao, alternativas.* from alternativas JOIN perguntas on fkPergunta = perguntas.id WHERE questao = 'Q1';
+-- -- Desconhecido
+-- select questao, alternativas.* from alternativas JOIN perguntas on fkPergunta = perguntas.id WHERE questao = 'Q1';
 
-select * from usuario;
+-- select * from usuario;
 
-select quiz.*, a.* from quiz join alternativas a on alternativa1 = a.id;
+-- select quiz.*, a.* from quiz join alternativas a on alternativa1 = a.id;
 
--- Buscar top usuário
-SELECT fkUsuario, nome FROM ranking JOIN usuario ON fkUsuario = usuario.id ORDER BY qtd_acertos DESC LIMIT 1;
+-- -- Buscar top usuário
+-- SELECT fkUsuario, nome FROM ranking JOIN usuario ON fkUsuario = usuario.id ORDER BY qtd_acertos DESC LIMIT 1;
 
--- Gráfico
-SELECT nome, fkUsuario, qtd_acertos FROM ranking JOIN usuario ON fkUsuario = usuario.id ORDER BY qtd_acertos DESC;
+-- -- Gráfico
+-- SELECT nome, fkUsuario, qtd_acertos FROM ranking JOIN usuario ON fkUsuario = usuario.id ORDER BY qtd_acertos DESC;
 
--- Buscar a média de acertos do quiz
-SELECT ROUND(AVG(qtd_acertos),0) media FROM ranking;
+-- -- Buscar a média de acertos do quiz
+-- SELECT ROUND(AVG(qtd_acertos),0) media FROM ranking;

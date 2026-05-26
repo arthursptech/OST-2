@@ -186,6 +186,10 @@ h1 {
   gap: 30px;
 }
 
+#img_Ending {
+  max-width: 550px;
+  height: 322px;
+}
 .flex p {
   flex: 1;
   max-width: 100%;
