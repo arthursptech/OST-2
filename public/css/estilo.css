@@ -609,6 +609,11 @@ iframe {
 
 /* Project Hail Mary Page */
 
+.banner.phm {
+  background-image: url(https://images.alphacoders.com/140/1407056.jpg);
+  background-size: contain;
+  background-attachment: fixed;
+}
 .background-phm {
   width: 100%;
   height: auto;
@@ -683,6 +688,14 @@ background-color: #f81b2d;
 }
 
 /* TTGL Page */
+
+.banner.ttgl {
+  background-image: url(../assets/imgs/ttglPic.webp);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position:bottom;
+}
 
 .background-ttgl {
   width: 100%;

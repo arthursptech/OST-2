@@ -52,7 +52,7 @@
 
 
 
-  <div class="banner">
+  <div class="banner phm">
   </div>
 
   <div class="background-phm">
@@ -152,6 +152,9 @@
 
 </body>
 <script>
+  var audio = document.getElementById("audio");
+  audio.volume = 0.20;
+
   function tocarVideo(num) {
     audio.pause();
       img_silk.innerHTML = `<iframe src="https://www.youtube.com/embed/8SmNwEeP4iM?si=KdTUFUulFYLGdXpE&amp;start=49&autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
