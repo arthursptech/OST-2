@@ -26,7 +26,7 @@ git clone https://github.com/arthursptech/Projeto-Individual.git
 
 ## 2. Instalação de dependências
 ```bash
-npm install ou npm i
+npm install
 ```
 
 ## 3. Configure o Banco de Dados
@@ -36,10 +36,10 @@ npm install ou npm i
 Crie um arquivo .env e .env.dev:
 
 ```bash
-DB_HOST=localhost
-DB_USER=usuario
-DB_PASSWORD=sua_senha
-DB_DATABASE=nome_banco
+DB_HOST= "localhost"
+DB_DATABASE= "ost"
+DB_USER= "seu_usuario"
+DB_PASSWORD= "sua_senha"
 PORT=3306
 
 APP_PORT=3333
