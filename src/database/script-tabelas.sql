@@ -17,14 +17,8 @@ CREATE TABLE mensagem (
 	FOREIGN KEY (fkUsuario) REFERENCES usuario(id)
 );
 
-CREATE TABLE ranking (
-	id INT PRIMARY KEY AUTO_INCREMENT,
-	qtd_acertos INT,
-	dtHrRegistro DATETIME DEFAULT NOW(),
-	fkUsuario INT,
-	CONSTRAINT cFkUsuario FOREIGN KEY (fkUsuario)
-	REFERENCES usuario(id)
-);
+-- O ranking não é mais uma tabela: é calculado a partir de respostasUser + alternativas
+-- (melhor tentativa de cada usuário), em src/models/rankingModel.js
 
 CREATE TABLE perguntas (
     id INT PRIMARY KEY AUTO_INCREMENT,
@@ -41,12 +35,24 @@ CREATE TABLE alternativas (
 );
 
 
+CREATE TABLE tentativas (
+    idTentativa INT PRIMARY KEY AUTO_INCREMENT,
+    dtHrRegistro DATETIME DEFAULT NOW(),
+    fkUsuario INT,
+    FOREIGN KEY (fkUsuario) REFERENCES usuario(id)
+);
+
+-- As alternativas do quiz agora são geradas a partir do Last.fm:
+-- a alternativa escolhida pelo usuário é inserida em "alternativas" no momento da resposta
 CREATE TABLE respostasUser (
     id INT PRIMARY KEY AUTO_INCREMENT,
     fkAlternativa INT,
     fkUsuario INT,
+    fkTentativa INT,
+    tempoResposta DECIMAL(6,2), -- segundos gastos para responder a questão
     FOREIGN KEY (fkAlternativa) REFERENCES alternativas(id),
-    FOREIGN KEY (fkUsuario) REFERENCES usuario(id)
+    FOREIGN KEY (fkUsuario) REFERENCES usuario(id),
+    FOREIGN KEY (fkTentativa) REFERENCES tentativas(idTentativa)
 );
 
 INSERT INTO perguntas (questao) VALUES

@@ -28,7 +28,7 @@
 
 <!-- <body onload=" atualizarFeed()"> -->
 
-<body onload="validarSessao(), listarTop(), listarMedia(), listarGrafico(), buscarScore(), buscarTopOst(), listarGraphTentativas()">
+<body onload="validarSessao(), listarTop(), listarMedia(), listarGrafico(), buscarScore(), buscarTopOst(), listarGraphTentativas(), listarGraphTempo()">
 
     <div class="janela">
         <div class="header-left">
@@ -115,6 +115,20 @@
                 <div class="ranking-attempt-graph">
                     <span>Tentativas:</span>
                     <span id="datas"></span>
+                </div>
+            </div>
+
+            <div class="graphs-line" style="margin-bottom: 5vh;">
+                <div class="ranking-graph">
+                    <canvas id="graph-tempo"></canvas>
+                </div>
+                <div class="ranking-attempt-graph" style="text-align: center;">
+                    <span>Seu tempo médio:</span>
+                    <span class="data" id="tempoUsuario">-</span>
+                    <span>Média dos jogadores:</span>
+                    <span class="data" id="tempoGeral">-</span>
+                    <span>Tentativa mais rápida:</span>
+                    <span class="data" id="tentativaRapida">-</span>
                 </div>
             </div>
         </div>
@@ -371,6 +385,107 @@
         // Adicionando gráfico criado em div na tela
         let myChart = new Chart(
             document.getElementById('graph-attempt'),
+            config
+        );
+    }
+
+    function listarGraphTempo() {
+        fetch(`/ranking/tempo/${idUser}`, { cache: 'no-store' }).then(function (response) {
+            if (response.ok) {
+                response.json().then(function (resposta) {
+                    console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
+
+                    // KPIs (tentativas feitas antes de o tempo ser registrado ficam sem valor)
+                    document.getElementById("tempoUsuario").innerHTML = formatarTempo(resposta.mediaUsuario);
+                    document.getElementById("tempoGeral").innerHTML = formatarTempo(resposta.mediaGeral);
+
+                    let maisRapida = null;
+                    resposta.tentativas.forEach(function (registro, i) {
+                        if (registro.tempo_medio != null && (maisRapida == null || Number(registro.tempo_medio) < Number(maisRapida.tempo))) {
+                            maisRapida = { numero: i + 1, tempo: registro.tempo_medio };
+                        }
+                    });
+                    document.getElementById("tentativaRapida").innerHTML = maisRapida
+                        ? `Tentativa ${maisRapida.numero} (${formatarTempo(maisRapida.tempo)})`
+                        : "-";
+
+                    plotarGraficoTempo(resposta.tentativas);
+                });
+            } else {
+                console.error('Nenhum dado encontrado ou erro na API');
+            }
+        })
+            .catch(function (error) {
+                console.error(`Erro na obtenção dos dados p/ gráfico: ${error.message}`);
+            });
+    }
+
+    function formatarTempo(segundos) {
+        if (segundos == null) return "-";
+        return `${Number(segundos).toFixed(1).replace(".", ",")}s`;
+    }
+
+    // Mesma lógica do gráfico de acertos por tentativa, com o tempo médio gasto por questão
+    function plotarGraficoTempo(resposta) {
+
+        console.log('iniciando plotagem do gráfico...');
+
+        // Criando estrutura para plotar gráfico - labels
+        let labels = [];
+
+        // Criando estrutura para plotar gráfico - dados
+        let dados = {
+            labels: labels,
+            datasets: [{
+                label: 'Tempo médio por questão (s)',
+                data: [],
+                fill: false,
+                borderWidth: 1,
+                borderColor: '#E63946',
+                backgroundColor: '#E63946',
+                // Liga os pontos mesmo quando uma tentativa antiga não tem tempo registrado
+                spanGaps: true
+            }]
+        };
+        let options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    offset: true
+                },
+                y: {
+                    offset: true,
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function (valor) { return `${valor}s`; }
+                    },
+                    grid: {
+                        display: true,
+                        color: '#d2b48c',
+                        lineWidth: 0.3
+                    }
+                }
+            }
+        };
+
+        // Inserindo valores recebidos em estrutura para plotar o gráfico
+        for (let i = 0; i < resposta.length; i++) {
+            var registro = resposta[i];
+            labels.push(`Tentativa ${i + 1}`);
+            dados.datasets[0].data.push(registro.tempo_medio == null ? null : Number(registro.tempo_medio));
+        }
+
+        // Criando estrutura para plotar gráfico - config
+        const config = {
+            type: 'line',
+            data: dados,
+            options: options
+        };
+
+        // Adicionando gráfico criado em div na tela
+        let myChart = new Chart(
+            document.getElementById('graph-tempo'),
             config
         );
     }

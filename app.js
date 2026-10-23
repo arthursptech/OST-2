@@ -19,6 +19,8 @@ var indexRouter = require("./src/routes/index");
 var usuarioRouter = require("./src/routes/usuarios");
 var mensagensRouter = require("./src/routes/mensagens");
 var rankingRouter = require("./src/routes/ranking");
+var quizRouter = require("./src/routes/quiz");
+var spotifyRouter = require("./src/routes/spotify");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -30,6 +32,13 @@ app.use("/", indexRouter);
 app.use("/usuarios", usuarioRouter);
 app.use("/mensagens", mensagensRouter);
 app.use("/ranking", rankingRouter);
+app.use("/quiz", quizRouter);
+app.use("/spotify", spotifyRouter);
+
+// Já carrega a lista de músicas do Last.fm ao subir o servidor, para o primeiro quiz não demorar
+require("./src/services/ostService").listarMusicasOst().catch(function (erro) {
+    console.log("Não foi possível carregar as músicas do Last.fm: ", erro.message);
+});
 
 app.listen(PORTA_APP, function () {
     console.log(`

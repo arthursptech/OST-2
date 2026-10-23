@@ -35,4 +35,8 @@ router.get("/tentativa/graph/:id", function(req,res) {
     rankingController.buscarGrafico(req,res);
 })
 
+router.get("/tempo/:id", function(req,res) {
+    rankingController.buscarTempo(req,res);
+})
+
 module.exports = router;

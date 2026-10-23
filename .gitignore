@@ -8,3 +8,6 @@ package-lock.json
 
 .env
 .env.dev
+
+# Cache das buscas no iTunes (gerado automaticamente)
+cache

@@ -124,6 +124,23 @@ function buscarGrafico(req,res) {
     });
 }
 
+function buscarTempo(req, res) {
+    var idUsuario = req.params.id;
+
+    Promise.all([rankingModel.buscarGraficoTempo(idUsuario), rankingModel.buscarMediaTempo(idUsuario)])
+        .then(function ([tentativas, medias]) {
+            res.status(200).json({
+                tentativas: tentativas,
+                mediaUsuario: medias[0].media_usuario,
+                mediaGeral: medias[0].media_geral
+            });
+        }).catch(function (erro) {
+            console.log(erro);
+            console.log("Houve um erro ao buscar o tempo de resposta: ", erro.sqlMessage);
+            res.status(500).json(erro.sqlMessage);
+        });
+}
+
 module.exports = {
     buscarTopUsuario,
     buscarRanking,
@@ -132,5 +149,6 @@ module.exports = {
     buscarScore,
     buscarTopOst,
     buscarTentativa,
-    buscarGrafico
+    buscarGrafico,
+    buscarTempo
 }

@@ -44,7 +44,18 @@ PORT=3306
 
 APP_PORT=3333
 APP_HOST=localhost
+
+LASTFM_API_KEY="sua_api_key"
+LASTFM_USER=MsAqua
+LASTFM_LIMITE_MUSICAS=200
+
+SPOTIFY_PLAYLIST_ID=6VQOZVwVhlgpR00UKZXRrl
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
+SPOTIFY_REDIRECT_URI=http://127.0.0.1:8080/spotify/callback
 ```
+#### A chave do Last.fm é gratuita e pode ser criada em https://www.last.fm/api/account/create
+#### As credenciais do Spotify são opcionais: sem elas só as 100 primeiras músicas da playlist são lidas. Crie um app gratuito em https://developer.spotify.com/dashboard para obter o Client ID e o Client Secret. Cadastre no app o mesmo `SPOTIFY_REDIRECT_URI` e, com o servidor rodando, acesse http://127.0.0.1:8080/spotify/login uma vez com a conta dona da playlist
 #### Importante: caso sua senha contenha caracteres especiais, insira-a entre 'aspas'
 
 ## 5. Configure o ambiente
@@ -90,6 +101,18 @@ Na seção de Exemplos, é possível acessar uma página dedicada àquela OST cl
 
 ### <a href="./public/dashboard/cards.html">Quiz</a>
 <img src="./public/assets/imgs/quizSS.png">
+
+As músicas do quiz são sorteadas a partir de duas fontes:
+
+- A playlist de OSTs do Spotify configurada em `SPOTIFY_PLAYLIST_ID` (todas as músicas entram)
+- As músicas mais ouvidas do usuário do Last.fm configurado em `LASTFM_USER`, filtrando apenas as que têm a tag (gênero) de Original Soundtrack Cada questão toca automaticamente um trecho de 10 segundos da música correta e mostra 4 alternativas com a imagem da mídia ou, se não encontrada, a capa do álbum:
+
+- Aberturas e encerramentos de anime: áudio oficial e identificação do anime pelo [AnimeThemes](https://animethemes.moe)
+- Músicas da playlist: trecho de 30 segundos do próprio Spotify
+- Demais músicas: preview da versão oficial no iTunes (com o Deezer como alternativa)
+- Imagens: [AniList](https://anilist.co) para animes e Wikipedia para filmes, jogos e séries
+
+As APIs têm limite de requisições por minuto (o iTunes aceita cerca de 20), então na primeira vez que o servidor sobe a lista de músicas leva alguns minutos para carregar. Os resultados ficam salvos na pasta `cache/` e as próximas inicializações são rápidas.
 
 ### Modelo do Quiz - Adivinhe de onde é a OST
 <img src="./public/assets/imgs/quizExSS.png">
