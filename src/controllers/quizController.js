@@ -1,6 +1,7 @@
 var crypto = require("crypto");
 var ostService = require("../services/ostService");
 var rankingModel = require("../models/rankingModel");
+var sessaoService = require("../services/sessaoService");
 
 var QTD_QUESTOES = 10;
 var VALIDADE_QUIZ_MS = 2 * 60 * 60 * 1000;
@@ -15,6 +16,31 @@ function limparQuizzesExpirados() {
     });
 }
 
+// Obras mostradas a cada usuário nos últimos quizzes, para o próximo quiz evitá-las.
+// Com ~125 obras e ~40 por quiz, lembrar 2 quizzes ainda deixa obras novas suficientes
+var QUIZZES_LEMBRADOS = 2;
+var historicoObras = new Map();
+
+function chaveHistorico(req) {
+    var idUsuario = sessaoService.usuarioDaSessao(req);
+    return idUsuario ? `usuario:${idUsuario}` : `ip:${req.ip}`;
+}
+
+function obrasRecentes(chave) {
+    return (historicoObras.get(chave) || []).flat();
+}
+
+function lembrarObras(chave, obras) {
+    var historico = (historicoObras.get(chave) || []).concat([obras]).slice(-QUIZZES_LEMBRADOS);
+    // Reinsere no fim do Map, que fica ordenado do usuário menos recente para o mais recente
+    historicoObras.delete(chave);
+    historicoObras.set(chave, historico);
+    // Limite de memória: esquece os usuários que jogaram há mais tempo
+    if (historicoObras.size > 1000) {
+        historicoObras.delete(historicoObras.keys().next().value);
+    }
+}
+
 function listarMusicas(req, res) {
     ostService.listarMusicasOst().then(function (musicas) {
         res.status(200).json(musicas);
@@ -27,7 +53,10 @@ function listarMusicas(req, res) {
 function gerarQuiz(req, res) {
     limparQuizzesExpirados();
 
-    ostService.gerarQuiz(QTD_QUESTOES).then(function (questoes) {
+    var chave = chaveHistorico(req);
+    ostService.gerarQuiz(QTD_QUESTOES, obrasRecentes(chave)).then(function (resultado) {
+        var questoes = resultado.questoes;
+        lembrarObras(chave, resultado.obras);
         var id = crypto.randomUUID();
         quizzesGerados.set(id, { questoes: questoes, criadoEm: Date.now() });
 

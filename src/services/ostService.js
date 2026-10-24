@@ -1078,33 +1078,58 @@ function agruparPorMidia(musicas) {
         // da mesma obra (ex.: "86" e "86 2nd Season", "Kara no Kyoukai 1" e "Kara no Kyoukai 5", "NieR:Automata" e "NieR Replicant")
         var palavras = normalizar(musica.midia).split(" ").filter(function (p) { return !["the", "a", "an", "tv"].includes(p); });
         var chave = palavras[0] || musica.midia.split(" ")[0];
-        if (!grupos.has(chave)) grupos.set(chave, []);
+        if (!grupos.has(chave)) {
+            var grupo = [];
+            grupo.chave = chave;
+            grupos.set(chave, grupo);
+        }
         grupos.get(chave).push(musica);
     });
     return Array.from(grupos.values());
 }
 
-async function gerarQuiz(qtdQuestoes) {
+// obrasEvitar: obras (chaves de grupo) mostradas ao usuário nos últimos quizzes. Elas só são usadas
+// se faltarem obras novas, para o mesmo quiz não se repetir quando o usuário joga várias vezes seguidas.
+// Devolve as questões e as obras usadas neste quiz (certas e alternativas)
+async function gerarQuiz(qtdQuestoes, obrasEvitar) {
     var musicas = await listarMusicasOst();
     var grupos = agruparPorMidia(musicas);
+    var evitar = new Set(obrasEvitar || []);
 
     if (grupos.length < 4) {
         throw new Error("São necessárias músicas OST de pelo menos 4 mídias diferentes para montar o quiz");
     }
 
+    // Ordem de prioridade: obras que o usuário não viu recentemente primeiro, depois as recentes
+    var ordem = embaralhar(grupos.filter(function (g) { return !evitar.has(g.chave); }))
+        .concat(embaralhar(grupos.filter(function (g) { return evitar.has(g.chave); })));
+    // Cada obra aparece no máximo uma vez por quiz (como resposta certa ou como alternativa)
+    var usadas = new Set();
+
+    function proximasObras(quantidade, exceto) {
+        var escolhidas = ordem.filter(function (g) { return g !== exceto && !usadas.has(g.chave); }).slice(0, quantidade);
+        // Lista pequena demais para não repetir: completamos com obras já usadas neste quiz
+        if (escolhidas.length < quantidade) {
+            var extras = embaralhar(grupos.filter(function (g) { return g !== exceto && !escolhidas.includes(g); }));
+            escolhidas = escolhidas.concat(extras.slice(0, quantidade - escolhidas.length));
+        }
+        return escolhidas;
+    }
+
     var questoes = [];
     // Procuramos uma música com preview disponível para cada questão
-    var candidatos = embaralhar(grupos);
-    for (var grupo of candidatos) {
+    for (var grupo of ordem) {
         if (questoes.length >= qtdQuestoes) break;
+        if (usadas.has(grupo.chave)) continue;
 
         var correta = embaralhar(grupo)[0];
         var preview = await obterPreview(correta);
         if (!preview) continue;
+        usadas.add(grupo.chave);
 
-        var distratores = embaralhar(grupos.filter(function (g) { return g !== grupo; }))
-            .slice(0, 3)
-            .map(function (g) { return embaralhar(g)[0]; });
+        var gruposDistratores = proximasObras(3, grupo);
+        gruposDistratores.forEach(function (g) { usadas.add(g.chave); });
+        var distratores = gruposDistratores.map(function (g) { return embaralhar(g)[0]; });
 
         var opcoes = embaralhar([correta].concat(distratores));
         // Uma imagem por vez, para não estourar o limite de requisições da Wikipedia/AniList
@@ -1129,7 +1154,7 @@ async function gerarQuiz(qtdQuestoes) {
     if (questoes.length === 0) {
         throw new Error("Não foi possível encontrar trechos das músicas para montar o quiz");
     }
-    return questoes;
+    return { questoes: questoes, obras: Array.from(usadas) };
 }
 
 module.exports = {

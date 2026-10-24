@@ -66,6 +66,11 @@ function encerrarSessao(req, res) {
     res.setHeader("Set-Cookie", `${NOME_COOKIE}=; ${opcoesCookie(req, 0)}`);
 }
 
+// Id do usuário logado, ou null (para rotas abertas que só personalizam a resposta)
+function usuarioDaSessao(req) {
+    return lerToken(lerCookie(req, NOME_COOKIE));
+}
+
 // Middleware das rotas que exigem login: coloca o id do usuário logado em req.idUsuario
 function exigirLogin(req, res, next) {
     var idUsuario = lerToken(lerCookie(req, NOME_COOKIE));
@@ -123,6 +128,7 @@ module.exports = {
     iniciarSessao,
     encerrarSessao,
     exigirLogin,
+    usuarioDaSessao,
     limitarLogin,
     registrarFalhaLogin,
     limparFalhasLogin

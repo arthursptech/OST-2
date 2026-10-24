@@ -739,3 +739,44 @@ background-color: #f81b2d;
     transform: none;
   }
 }
+
+/* Pop-up para liberar o som do quiz (quando o navegador bloqueia o autoplay) */
+.popup-som {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.75);
+  font-family: "Montserrat", sans-serif;
+}
+
+.popup-som-caixa {
+  width: min(420px, 88vw);
+  box-sizing: border-box;
+  padding: 24px;
+  text-align: center;
+  color: white;
+  background-color: #1e1e1e;
+  border: 3px solid #E63946;
+  border-radius: 10px;
+}
+
+.popup-som-caixa h3 {
+  margin-top: 0;
+  color: #E63946;
+  font-size: 1.4rem;
+}
+
+.popup-som-caixa .btn-nav.questao {
+  width: auto;
+  margin: 10px auto 0;
+  padding: 10px 24px;
+}
+
+.popup-som-dica {
+  margin-bottom: 0;
+  font-size: 0.8rem;
+  color: #aaa;
+}

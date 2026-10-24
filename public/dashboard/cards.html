@@ -71,6 +71,17 @@
             <p id="p_aguardar">Redirecionando...</p>
         </div>
 
+        <!-- Aparece quando o navegador bloqueia o som automático: o clique no botão libera o áudio -->
+        <div id="div_ativar_som" class="popup-som">
+            <div class="popup-som-caixa">
+                <h3>🔊 Ativar o som</h3>
+                <p>Seu navegador bloqueou o som automático. O quiz precisa tocar um trecho de cada música.</p>
+                <button class="btn-nav questao" onclick="ativarSom()">Ativar som</button>
+                <p class="popup-som-dica">Para não ver este aviso de novo, permita a reprodução automática de som
+                    para este site nas configurações do navegador.</p>
+            </div>
+        </div>
+
         <div class="body" id="main">
             <!-- As questões são geradas a partir das OSTs do Last.fm -->
             <div id="div_questoes" style="display: contents"></div>
@@ -285,12 +296,19 @@
         function iniciar() {
             // O preview tem ~30s, então sorteamos o início do trecho.
             // Alguns .ogg do AnimeThemes chegam sem a duração (Infinity/NaN): aí começamos do início
-            let duracao = isFinite(musica.duration) ? musica.duration : 0;
-            let maxInicio = Math.max(0, duracao - DURACAO_TRECHO);
-            try {
-                musica.currentTime = Math.random() * maxInicio;
-            } catch (erro) {
-                musica.currentTime = 0;
+            function sortearInicio() {
+                let duracao = isFinite(musica.duration) ? musica.duration : 0;
+                let maxInicio = Math.max(0, duracao - DURACAO_TRECHO);
+                try {
+                    musica.currentTime = Math.random() * maxInicio;
+                } catch (erro) {
+                    musica.currentTime = 0;
+                }
+            }
+            if (musica.readyState >= 1) {
+                sortearInicio();
+            } else {
+                musica.addEventListener("loadedmetadata", sortearInicio, { once: true });
             }
 
             // Se em alguns segundos o trecho não começar, troca para o alternativo
@@ -300,6 +318,8 @@
                 }
             }, 6000);
 
+            // O play é chamado já (mesmo com o áudio ainda carregando): assim ele acontece "dentro" do
+            // clique do usuário, que é o que os navegadores (principalmente o Safari) exigem para tocar som
             musica.play().then(function () {
                 clearTimeout(timerTrecho);
                 let restante = DURACAO_TRECHO;
@@ -313,10 +333,11 @@
                 // AbortError: o trecho foi pausado antes de começar (usuário trocou de questão)
                 if (erro.name === "AbortError") return;
                 clearTimeout(timerTrecho);
-                // O navegador pode bloquear o autoplay, então o usuário clica para ouvir
+                // O navegador bloqueou o som automático: pedimos um clique ao usuário
                 if (erro.name === "NotAllowedError") {
                     console.log("Autoplay bloqueado: ", erro);
                     contagem.innerHTML = "Ouvir trecho";
+                    pedirAtivacaoSom(questao);
                     return;
                 }
                 console.log("Não foi possível tocar o trecho: ", erro);
@@ -330,12 +351,22 @@
             if (!usarAlternativo()) contagem.innerHTML = "Trecho indisponível";
         };
 
-        if (musica.readyState >= 1) {
-            iniciar();
-        } else {
-            musica.addEventListener("loadedmetadata", iniciar, { once: true });
-            musica.load();
-        }
+        iniciar();
+    }
+
+    // ---------- Pop-up para liberar o som ----------
+    let questaoSemSom = null;
+
+    function pedirAtivacaoSom(questao) {
+        questaoSemSom = questao;
+        div_ativar_som.style.display = "flex";
+    }
+
+    // O clique no botão conta como interação do usuário: a partir dele o navegador libera o áudio
+    function ativarSom() {
+        div_ativar_som.style.display = "none";
+        if (questaoSemSom) tocarTrecho(questaoSemSom);
+        questaoSemSom = null;
     }
 
     function pararTrecho() {
