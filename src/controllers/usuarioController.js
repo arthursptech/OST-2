@@ -1,5 +1,6 @@
 var usuarioModel = require("../models/usuarioModel");
 var senhaService = require("../services/senhaService");
+var sessaoService = require("../services/sessaoService");
 
 function autenticar(req, res) {
     var email = req.body.emailServer;
@@ -24,6 +25,9 @@ function autenticar(req, res) {
                 }
 
                 if (usuario) {
+                    // A sessão fica num cookie assinado: é ele (e não o id guardado na página) que diz quem é o usuário
+                    sessaoService.limparFalhasLogin(req);
+                    sessaoService.iniciarSessao(req, res, usuario.id);
                     // Nunca devolvemos a senha (nem o hash) para o navegador
                     res.json({
                         id: usuario.id,
@@ -31,6 +35,7 @@ function autenticar(req, res) {
                         nome: usuario.nome
                     });
                 } else {
+                    sessaoService.registrarFalhaLogin(req);
                     res.status(403).send("Email e/ou senha inválido(s)");
                 }
             }).catch(
@@ -81,7 +86,29 @@ function cadastrar(req, res) {
     }
 }
 
+// Dados do usuário logado (a partir do cookie de sessão)
+function buscarUsuarioLogado(req, res) {
+    usuarioModel.buscarPorId(req.idUsuario)
+        .then(function (resultado) {
+            if (resultado.length == 0) {
+                sessaoService.encerrarSessao(req, res);
+                return res.status(401).send("Usuário não encontrado. Faça login novamente.");
+            }
+            res.json(resultado[0]);
+        }).catch(function (erro) {
+            console.log(erro);
+            res.status(500).json("Houve um erro ao buscar o usuário");
+        });
+}
+
+function sair(req, res) {
+    sessaoService.encerrarSessao(req, res);
+    res.status(200).send("Sessão encerrada");
+}
+
 module.exports = {
     autenticar,
-    cadastrar
+    cadastrar,
+    buscarUsuarioLogado,
+    sair
 }

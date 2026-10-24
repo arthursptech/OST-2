@@ -63,7 +63,7 @@ function pesquisarDescricao(req, res) {
 function publicar(req, res) {
     var titulo = req.body.titulo;
     var descricao = req.body.descricao;
-    var idUsuario = req.params.idUsuario;
+    var idUsuario = req.idUsuario;
 
     if (typeof titulo != "string" || titulo.trim() == "") {
         res.status(400).send("O título está indefinido!");
@@ -88,11 +88,11 @@ function publicar(req, res) {
     }
 }
 
-// O autor da mensagem vem no corpo da requisição; se a mensagem não for dele, nada é alterado
+// O autor é o usuário da sessão; se a mensagem não for dele, nada é alterado
 function editar(req, res) {
     var novaDescricao = req.body.descricao;
     var idMensagem = req.params.idMensagem;
-    var idUsuario = req.body.idUsuario;
+    var idUsuario = req.idUsuario;
 
     if (typeof novaDescricao != "string" || novaDescricao.trim() == "") {
         return res.status(400).send("A descrição está indefinida!");
@@ -119,7 +119,7 @@ function editar(req, res) {
 
 function deletar(req, res) {
     var idMensagem = req.params.idMensagem;
-    var idUsuario = req.body.idUsuario;
+    var idUsuario = req.idUsuario;
 
     mensagemModel.deletar(idMensagem, idUsuario)
         .then(

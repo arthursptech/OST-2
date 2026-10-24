@@ -10,6 +10,13 @@ function buscarPorEmail(email) {
     return database.executar(instrucaoSql, [email], true);
 }
 
+function buscarPorId(id) {
+    var instrucaoSql = `
+        SELECT id, nome, email FROM usuario WHERE id = ?;
+    `;
+    return database.executar(instrucaoSql, [id], true);
+}
+
 // A senha chega aqui já como hash (ver senhaService)
 function cadastrar(nome, email, senhaHash) {
     var instrucaoSql = `
@@ -39,6 +46,7 @@ async function protegerSenhasAntigas() {
 
 module.exports = {
     buscarPorEmail,
+    buscarPorId,
     cadastrar,
     protegerSenhasAntigas
 };

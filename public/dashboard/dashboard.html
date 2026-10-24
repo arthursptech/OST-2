@@ -148,7 +148,7 @@
             return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
         });
     }
-    b_id.innerHTML = sessionStorage.ID_USUARIO
+    b_id.textContent = sessionStorage.ID_USUARIO
     let idUser = sessionStorage.ID_USUARIO;
     const ranking = document.getElementById('grafico-media');
     Chart.defaults.color = '#FFF';
@@ -181,7 +181,7 @@
     }
 
     function buscarScore() {
-        fetch(`/ranking/score/${idUser}`, {
+        fetch("/ranking/score", {
             method: "GET"
         }).then(res => {
             res.json().then(json => {
@@ -239,7 +239,7 @@
     }
 
     function listarGraphTentativas() {
-        fetch(`/ranking/tentativa/graph/${idUser}`, { cache: 'no-store' }).then(function (response) {
+        fetch("/ranking/tentativa/graph", { cache: 'no-store' }).then(function (response) {
             if (response.ok) {
                 response.json().then(function (resposta) {
                     console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);
@@ -399,7 +399,7 @@
     }
 
     function listarGraphTempo() {
-        fetch(`/ranking/tempo/${idUser}`, { cache: 'no-store' }).then(function (response) {
+        fetch("/ranking/tempo", { cache: 'no-store' }).then(function (response) {
             if (response.ok) {
                 response.json().then(function (resposta) {
                     console.log(`Dados recebidos: ${JSON.stringify(resposta)}`);

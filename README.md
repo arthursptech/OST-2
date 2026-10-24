@@ -99,7 +99,9 @@ O cache das APIs, a lista de músicas do quiz e o login do Spotify ficam salvos 
 ### 2. Servidor no Render
 1. *New* > *Web Service* > conecte o repositório do GitHub (branch `main`).
 2. Build command: `npm install` | Start command: `npm start` | Instance type: **Free**.
-3. Em *Environment*, cadastre as variáveis do `.env`: `AMBIENTE_PROCESSO=producao`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `DB_SSL=true`, `DB_SSL_CA`, `LASTFM_API_KEY`, `LASTFM_USER`, `LASTFM_LIMITE_MUSICAS`, `SPOTIFY_PLAYLIST_ID`, `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` e `SPOTIFY_REDIRECT_URI=https://SEU-APP.onrender.com/spotify/callback`. Não é preciso definir a porta.
+3. Em *Environment*, cadastre as variáveis do `.env`: `AMBIENTE_PROCESSO=producao`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `DB_SSL=true`, `DB_SSL_CA`, `LASTFM_API_KEY`, `LASTFM_USER`, `LASTFM_LIMITE_MUSICAS`, `SPOTIFY_PLAYLIST_ID`, `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET`, `SESSAO_SEGREDO` (uma chave aleatória longa; veja o `.env.example`) e `SPOTIFY_REDIRECT_URI=https://SEU-APP.onrender.com/spotify/callback`. Não é preciso definir a porta.
+
+   > `SEU-APP` é só um exemplo: troque pelo endereço real do seu serviço, que aparece no topo da página dele no Render (ex.: `https://ost-project.onrender.com`). O mesmo vale para o Redirect URI cadastrado no app do Spotify e para a URL do cron-job.org.
 4. No app do Spotify (developer.spotify.com), adicione o Redirect URI `https://SEU-APP.onrender.com/spotify/callback`. Se o login do Spotify não foi feito no passo 1.4, acesse `https://SEU-APP.onrender.com/spotify/login` uma vez.
 5. A cada push na `main` o Render publica a nova versão automaticamente.
 

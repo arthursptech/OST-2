@@ -16,6 +16,10 @@ var HOST_APP = process.env.APP_HOST;
 
 var app = express();
 
+// No Render o site fica atrás de um proxy: assim req.ip é o IP do visitante (usado no limite
+// de tentativas de login) e req.secure reconhece o HTTPS (cookie de sessão com "Secure")
+app.set("trust proxy", 1);
+
 var indexRouter = require("./src/routes/index");
 var usuarioRouter = require("./src/routes/usuarios");
 var mensagensRouter = require("./src/routes/mensagens");

@@ -104,7 +104,7 @@
 <script>
     
     b_usuario.textContent = sessionStorage.NOME_USUARIO;
-    b_id.innerHTML = sessionStorage.ID_USUARIO;
+    b_id.textContent = sessionStorage.ID_USUARIO;
     let infoPostagem = [];
 
     function escaparHtml(texto) {
@@ -118,13 +118,14 @@
     }
 
     function publicar() {
+        // O autor é o usuário da sessão (o servidor descobre pelo cookie)
         var idUsuario = sessionStorage.ID_USUARIO;
         var corpo = {
             titulo: form_postagem.titulo.value,
             descricao: form_postagem.descricao.value
         }
 
-        fetch(`/mensagens/publicar/${idUsuario}`, {
+        fetch("/mensagens/publicar", {
             method: "post",
             headers: {
                 "Content-Type": "application/json"
@@ -139,6 +140,8 @@
                 window.location = "/dashboard/mural.html";
                 limparFormulario();
                 finalizarAguardar();
+            } else if (resposta.status == 401) {
+                sessaoExpirada();
             } else if (resposta.status == 404) {
                 window.alert("Deu 404!");
             } else {
@@ -191,13 +194,14 @@
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ idUsuario: sessionStorage.ID_USUARIO })
+            }
         }).then(function (resposta) {
 
             if (resposta.ok) {
                 window.alert("Post deletado com sucesso pelo usuario de email: " + sessionStorage.getItem("EMAIL_USUARIO") + "!");
                 window.location = "/dashboard/mural.html"
+            } else if (resposta.status == 401) {
+                sessaoExpirada();
             } else if (resposta.status == 404) {
                 window.alert("Deu 404!");
             } else {

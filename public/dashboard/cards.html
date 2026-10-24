@@ -90,7 +90,7 @@
 </body>
 
 <script>
-    b_id.innerHTML = sessionStorage.ID_USUARIO;
+    b_id.textContent = sessionStorage.ID_USUARIO;
     let idUser = sessionStorage.ID_USUARIO;
     b_usuario.textContent = sessionStorage.NOME_USUARIO;
 
@@ -134,8 +134,7 @@
             body: JSON.stringify({
                 quizServer: quiz.id,
                 respostasServer: respostasVetor,
-                temposServer: temposVetor,
-                userServer: sessionStorage.ID_USUARIO
+                temposServer: temposVetor
             }),
         })
         .then(function (resposta){
@@ -145,6 +144,8 @@
                 setTimeout(function () {
                     window.location = "./dashboard.html";
                 }, 1000);
+            } else if (resposta.status == 401) {
+                sessaoExpirada();
             } else {
                 console.log("Houve um erro ao registrar a resposta do usuário");
                 window.location = "cards.html";

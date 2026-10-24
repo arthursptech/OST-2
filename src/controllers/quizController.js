@@ -53,7 +53,7 @@ async function responderQuiz(req, res) {
     var idQuiz = req.body.quizServer;
     var respostas = req.body.respostasServer;
     var tempos = Array.isArray(req.body.temposServer) ? req.body.temposServer : [];
-    var usuario = Number(req.body.userServer);
+    var usuario = req.idUsuario;
     var quiz = quizzesGerados.get(idQuiz);
 
     if (!quiz || !Number.isInteger(usuario) || !Array.isArray(respostas) || respostas.length !== quiz.questoes.length) {
