@@ -23,7 +23,7 @@ var historicoObras = new Map();
 
 function chaveHistorico(req) {
     var idUsuario = sessaoService.usuarioDaSessao(req);
-    return idUsuario ? `usuario:${idUsuario}` : `ip:${req.ip}`;
+    return idUsuario ? `usuario:${idUsuario}` : `ip:${sessaoService.ipDoVisitante(req)}`;
 }
 
 function obrasRecentes(chave) {

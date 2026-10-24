@@ -81,6 +81,14 @@ function exigirLogin(req, res, next) {
     next();
 }
 
+// IP do visitante. No Render o site fica atrás do Cloudflare, que envia o IP real no cabeçalho
+// CF-Connecting-IP (e o sobrescreve, então o visitante não consegue falsificá-lo). O req.ip, que vem
+// do X-Forwarded-For, pode trazer o IP do próprio Cloudflare, que muda entre as requisições.
+// Fora do Render (rodando localmente) o cabeçalho não existe e usamos o req.ip
+function ipDoVisitante(req) {
+    return req.headers["cf-connecting-ip"] || req.ip;
+}
+
 // ---------- Limite de tentativas de login ----------
 // Cada IP pode errar a senha até 10 vezes a cada 15 minutos; depois disso o login fica
 // bloqueado até a janela acabar. Logins certos não contam.
@@ -99,7 +107,7 @@ function tentativasDoIp(ip) {
 }
 
 function limitarLogin(req, res, next) {
-    var registro = tentativasDoIp(req.ip);
+    var registro = tentativasDoIp(ipDoVisitante(req));
     if (registro.quantidade >= LIMITE_TENTATIVAS) {
         var minutos = Math.ceil((registro.inicio + JANELA_MS - Date.now()) / 60000);
         res.setHeader("Retry-After", minutos * 60);
@@ -109,11 +117,11 @@ function limitarLogin(req, res, next) {
 }
 
 function registrarFalhaLogin(req) {
-    tentativasDoIp(req.ip).quantidade++;
+    tentativasDoIp(ipDoVisitante(req)).quantidade++;
 }
 
 function limparFalhasLogin(req) {
-    tentativas.delete(req.ip);
+    tentativas.delete(ipDoVisitante(req));
 }
 
 // Remove de tempos em tempos os IPs cuja janela já acabou, para o Map não crescer sem parar
@@ -129,6 +137,7 @@ module.exports = {
     encerrarSessao,
     exigirLogin,
     usuarioDaSessao,
+    ipDoVisitante,
     limitarLogin,
     registrarFalhaLogin,
     limparFalhasLogin
