@@ -247,6 +247,28 @@ function extrairMidiaDeTema(album) {
     return obra.length >= 2 ? obra : null;
 }
 
+// Coletâneas e arranjos de quem faz trilhas (ex.: "BEST OF VOCAL WORKS [nZk] 2",
+// "うみねこのなく頃に musicbox Red", "NieR Gestalt & Replicant Orchestral Arrangement Album")
+function ehColetanea(album) {
+    return /best of|vocal works|\bworks\b|collection|music ?box|anthology|greatest hits|compilation|arrangement/i.test(album || "");
+}
+
+// Artistas cujas músicas do Last.fm entram mesmo fora de álbuns de trilha (ex.: Dai, das músicas de Umineko)
+var ARTISTAS_OST = ["dai"];
+// Álbuns (fora de trilhas e coletâneas) cujas músicas do Last.fm também entram:
+// álbuns do SawanoHiroyuki[nZk] ("o1", "iv", "RE/MEMBER")
+var ALBUNS_OST = ["o1", "iv", "re member"];
+
+// Música do Last.fm sem tags próprias, que passou no filtro só pelas tags do artista
+// (cantores de anime costumam ter "Soundtrack" entre as tags, o que traria qualquer single deles,
+// como aberturas e encerramentos). Ela só entra se o álbum for de trilha sonora, de tema ou uma
+// coletânea, ou se o artista estiver em ARTISTAS_OST ou o álbum em ALBUNS_OST
+function ehOstPeloArtista(musica) {
+    return ehAlbumTrilha(musica.album) || Boolean(extrairMidiaDeTema(musica.album))
+        || ehColetanea(musica.album) || ARTISTAS_OST.includes(normalizar(musica.artista))
+        || ALBUNS_OST.includes(normalizar(musica.album));
+}
+
 // Indica se o nome do álbum é de uma trilha sonora (e não uma coletânea, single, best of...)
 function ehAlbumTrilha(album) {
     return /soundtrack|\bost\b|o\.s\.t|original score|music from|music collection|サウンドトラック|オリジナル|ミュージックコレクション|音楽集/i.test(album || "");
@@ -264,22 +286,27 @@ async function detalharMusicaLastfm(item) {
     });
     var track = info.track || {};
     var tags = lerTags(track);
+    var tagsDoArtista = false;
 
     // Quando a música não tem tags, usamos as tags do artista
     if (tags.length === 0) {
         var infoArtista = await lastfm({ method: "artist.getTopTags", artist: item.artist.name, autocorrect: 1 });
         tags = lerTags(infoArtista).slice(0, 10);
+        tagsDoArtista = true;
     }
 
     if (!tags.some(ehTagOst)) return null;
 
-    return {
+    var musica = {
         titulo: item.name,
         artista: item.artist.name,
         album: track.album ? track.album.title : null,
         imagemAlbum: track.album ? melhorImagemLastfm(track.album.image) : null,
         origem: "lastfm"
     };
+    // Conferido em completarMusica, quando já se sabe o álbum final (ver ehOstPeloArtista)
+    if (tagsDoArtista) musica.tagsDoArtista = true;
+    return musica;
 }
 
 async function carregarMusicasLastfm() {
@@ -503,18 +530,19 @@ async function carregarMusicasSpotify() {
 
 // Descobre o áudio, o álbum e a mídia (anime, filme, jogo...) de uma música do Last.fm ou do Spotify
 async function completarMusica(musica) {
-    // Abertura/encerramento de anime? (AnimeThemes)
-    try {
-        musica.animeTheme = await buscarAnimeTheme(musica);
-    } catch (erro) {
-        console.log(`Erro ao buscar no AnimeThemes: ${erro.message}`);
-    }
-
     // Versão oficial da música no iTunes (ou Deezer): trecho, álbum e capa.
     // Músicas do Spotify que já têm trecho e álbum não precisam dessa busca (o iTunes tem limite de buscas)
     var oficial = {};
     if (!(musica.previewSpotify && musica.album)) {
         oficial = await buscarVersaoOficial(musica) || {};
+    }
+
+    // Abertura/encerramento de anime? (AnimeThemes). O artista do iTunes/Deezer vem em alfabeto latino
+    // ("平田志穂子" -> "Shihoko Hirata") e ajuda a conferir se é mesmo a mesma música
+    try {
+        musica.animeTheme = await buscarAnimeTheme(musica, oficial.artista);
+    } catch (erro) {
+        console.log(`Erro ao buscar no AnimeThemes: ${erro.message}`);
     }
     var temAudio = oficial.fonte || musica.previewSpotify || (musica.animeTheme && musica.animeTheme.audio);
     if (!temAudio) return null;
@@ -529,6 +557,7 @@ async function completarMusica(musica) {
     musica.imagemAlbum = musica.imagemAlbum || oficial.capa;
 
     if (!musica.album && !musica.animeTheme) return null;
+    if (musica.tagsDoArtista && !ehOstPeloArtista(musica)) return null;
 
     if (musica.animeTheme) {
         // O AnimeThemes já diz de qual anime é (ex.: "Duvet" da bôa -> Serial Experiments Lain)
@@ -767,8 +796,25 @@ async function buscarVersaoDeezer(musica) {
 }
 
 // Aberturas/encerramentos de anime no AnimeThemes: diz de qual anime é a música e traz o áudio oficial
-async function buscarAnimeTheme(musica) {
-    var chave = `${musica.artista} - ${musica.titulo}`;
+// O artista do AnimeThemes confere com o nome em alfabeto latino vindo do iTunes/Deezer?
+// Também aceita quando esse nome é o de uma série que aparece no nome do anime
+// (ex.: "MONOGATARI Series" -> "Hanamonogatari", cantada por "Miyuki Sawashiro")
+function artistaConfere(artistasTema, artistaLatino, anime) {
+    var tema = normalizar(artistasTema);
+    var latino = normalizar(artistaLatino);
+    var nomeAnime = normalizar(anime).replace(/ /g, "");
+    return titulosParecidos(tema, latino)
+        || tema.split(" ").some(function (p) { return p.length > 2 && latino.split(" ").includes(p); })
+        || latino.split(" ").some(function (p) { return p.length > 3 && !["series", "music", "sound", "project"].includes(p) && nomeAnime.includes(p); });
+}
+
+// artistaLatino: nome do artista em alfabeto latino (do iTunes/Deezer), usado quando o artista
+// da música está em outro alfabeto e não dá para comparar com o do AnimeThemes
+async function buscarAnimeTheme(musica, artistaLatino) {
+    var artistaNaoLatino = !normalizar(musica.artista);
+    var latino = artistaNaoLatino && normalizar(artistaLatino) ? artistaLatino : null;
+    // A conferência muda com o nome latino, então ele entra na chave do cache
+    var chave = `${musica.artista} - ${musica.titulo}` + (latino ? ` (${latino})` : "");
     if (cacheAnimeThemes.tem(chave)) return cacheAnimeThemes.ler(chave);
 
     await aguardarVezAnimeThemes();
@@ -788,10 +834,15 @@ async function buscarAnimeTheme(musica) {
             || tituloBase(tema.song.title) === tituloBase(musica.titulo);
         var artistas = (tema.song.artists || []).map(function (a) { return a.name; }).join(" ");
         if (!mesmoTitulo || !normalizar(artistas)) return false;
-        // Artista em outro alfabeto (ex.: "梶浦由記" x "Yuki Kajiura"): não dá para comparar, então só aceitamos
-        // se o álbum não for a trilha sonora de outra obra (ex.: "The Tower" do álbum de NieR:Automata
-        // não é o encerramento "The Tower" de Carole & Tuesday)
-        if (!normalizar(musica.artista)) {
+        // Artista em outro alfabeto, mas com o nome latino do iTunes/Deezer: comparamos com ele
+        // (ex.: "Heaven" de "Shihoko Hirata", de Persona 4, não é o "HEAVEN" do GRANRODEO, de Koutetsushin Jeeg)
+        if (latino) {
+            return artistaConfere(artistas, latino, tema.anime.name);
+        }
+        // Artista em outro alfabeto (ex.: "梶浦由記" x "Yuki Kajiura") sem o nome latino: não dá para comparar,
+        // então só aceitamos se o álbum não for a trilha sonora de outra obra (ex.: "The Tower" do álbum de
+        // NieR:Automata não é o encerramento "The Tower" de Carole & Tuesday)
+        if (artistaNaoLatino) {
             return !ehAlbumTrilha(musica.album) || mesmoNome(extrairMidia(musica.album), tema.anime.name)
                 || titulosParecidos(extrairMidia(musica.album), tema.anime.name);
         }
