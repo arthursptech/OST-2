@@ -549,7 +549,8 @@ async function completarMusica(musica) {
     // "KILL la KILL" (Last.fm) viram a mesma alternativa, e a imagem já vem junto
     if (musica.midiaConhecida) {
         try {
-            var anime = await buscarAnimeAniList(musica.midia);
+            var outraMidia = /motion picture|\bfilm\b|\bmovie\b|video ?game|\bgame\b/i.test(musica.album || "");
+            var anime = await buscarAnimeAniList(musica.midia, outraMidia);
             if (anime) {
                 musica.midia = anime.titulo;
                 musica.imagemAnime = anime.imagem;
@@ -879,8 +880,12 @@ async function buscarImagemAniList(midia) {
 }
 
 // Procura o anime no AniList pelo nome (romaji, inglês ou japonês) e devolve o nome oficial e a capa
-async function buscarAnimeAniList(midia) {
-    if (cacheAniList.tem(midia)) return cacheAniList.ler(midia);
+// estrito: o álbum indica outra mídia (filme, jogo...). Aí só vale o título principal do anime igual
+// ao nome da obra, sem nomes alternativos nem subtítulos (o filme "Twilight" não é o anime "Hakubo",
+// que tem "Twilight" como nome alternativo no AniList)
+async function buscarAnimeAniList(midia, estrito) {
+    var chaveCache = estrito ? `${midia}|estrito` : midia;
+    if (cacheAniList.tem(chaveCache)) return cacheAniList.ler(chaveCache);
     if (fontePausada(buscarImagemAniList)) return null;
 
     await aguardarVezAniList();
@@ -907,7 +912,8 @@ async function buscarAnimeAniList(midia) {
 
     var animes = (json.data && json.data.Page && json.data.Page.media) || [];
     function titulosDe(anime) {
-        return [anime.title.romaji, anime.title.english, anime.title.native].concat(anime.synonyms || []).filter(Boolean);
+        var titulos = [anime.title.romaji, anime.title.english, anime.title.native];
+        return (estrito ? titulos : titulos.concat(anime.synonyms || [])).filter(Boolean);
     }
     // Primeiro, igualdade exata, para não trazer um spin-off/filme com nome parecido
     var achado = animes.find(function (anime) {
@@ -917,7 +923,7 @@ async function buscarAnimeAniList(midia) {
     });
     // Depois, o nome da obra seguido de um subtítulo com hífen: "Parasyte" -> "Parasyte -the maxim-"
     // (só no primeiro resultado da busca, que é o mais próximo)
-    if (!achado && animes.length) {
+    if (!achado && !estrito && animes.length) {
         var subtitulo = titulosDe(animes[0]).some(function (t) {
             // Só hífen/til: dois-pontos costumam ser continuações ou derivados ("Honkai Impact 3rd: Reburn")
             return t.toLowerCase().startsWith(midia.toLowerCase()) && /^\s+[-~–—]/.test(t.slice(midia.length));
@@ -927,7 +933,7 @@ async function buscarAnimeAniList(midia) {
     var resultado = achado
         ? { titulo: achado.title.english || achado.title.romaji, imagem: achado.coverImage.extraLarge || achado.coverImage.large }
         : null;
-    cacheAniList.salvar(midia, resultado);
+    cacheAniList.salvar(chaveCache, resultado);
     return resultado;
 }
 
