@@ -110,7 +110,8 @@
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                descricao: textarea_descricao.value
+                descricao: textarea_descricao.value,
+                idUsuario: sessionStorage.ID_USUARIO
             })
         }).then(function (resposta) {
 

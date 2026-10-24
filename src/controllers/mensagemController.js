@@ -65,9 +65,9 @@ function publicar(req, res) {
     var descricao = req.body.descricao;
     var idUsuario = req.params.idUsuario;
 
-    if (titulo == undefined) {
+    if (typeof titulo != "string" || titulo.trim() == "") {
         res.status(400).send("O título está indefinido!");
-    } else if (descricao == undefined) {
+    } else if (typeof descricao != "string" || descricao.trim() == "") {
         res.status(400).send("A descrição está indefinido!");
     } else if (idUsuario == undefined) {
         res.status(403).send("O id do usuário está indefinido!");
@@ -88,13 +88,22 @@ function publicar(req, res) {
     }
 }
 
+// O autor da mensagem vem no corpo da requisição; se a mensagem não for dele, nada é alterado
 function editar(req, res) {
     var novaDescricao = req.body.descricao;
     var idMensagem = req.params.idMensagem;
+    var idUsuario = req.body.idUsuario;
 
-    mensagemModel.editar(novaDescricao, idMensagem)
+    if (typeof novaDescricao != "string" || novaDescricao.trim() == "") {
+        return res.status(400).send("A descrição está indefinida!");
+    }
+
+    mensagemModel.editar(novaDescricao, idMensagem, idUsuario)
         .then(
             function (resultado) {
+                if (resultado.affectedRows == 0) {
+                    return res.status(403).send("Você não pode editar a mensagem de outro usuário!");
+                }
                 res.json(resultado);
             }
         )
@@ -110,10 +119,14 @@ function editar(req, res) {
 
 function deletar(req, res) {
     var idMensagem = req.params.idMensagem;
+    var idUsuario = req.body.idUsuario;
 
-    mensagemModel.deletar(idMensagem)
+    mensagemModel.deletar(idMensagem, idUsuario)
         .then(
             function (resultado) {
+                if (resultado.affectedRows == 0) {
+                    return res.status(403).send("Você não pode deletar a mensagem de outro usuário!");
+                }
                 res.json(resultado);
             }
         )

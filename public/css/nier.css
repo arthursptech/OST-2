@@ -259,3 +259,78 @@ hr {
 #final {
   display: none;
 }
+/* ===================== CELULAR ===================== */
+/* Abaixo de 768px o layout empilha os blocos e usa a largura toda da tela */
+
+@media (max-width: 768px) {
+  .container {
+    width: 92%;
+  }
+
+  .musica {
+    margin-bottom: 0;
+  }
+  .musica span {
+    font-size: 13px;
+  }
+  .musica img {
+    height: 18px;
+  }
+  .header {
+    height: auto;
+    padding: 4px 0 8px;
+  }
+  .header .container {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .titulo {
+    font-size: 1.5rem;
+  }
+  .navbar {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    gap: 14px;
+    justify-content: center;
+  }
+
+  /* A altura acompanha a proporção da imagem, para ela aparecer inteira */
+  .banner {
+    height: auto;
+    aspect-ratio: 3046 / 1296;
+    background-position: center;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+    letter-spacing: .3rem;
+    text-align: center;
+  }
+
+  .main span {
+    width: 100%;
+    font-size: 16px;
+  }
+  .justificativa p {
+    max-width: 100%;
+    font-size: 16px;
+  }
+  .justificativa img {
+    max-width: 100%;
+    height: auto;
+  }
+  .flex {
+    flex-direction: column;
+    gap: 16px;
+  }
+  #img_Ending,
+  #img_9s img {
+    max-width: 100%;
+    height: auto;
+  }
+  iframe {
+    width: 100%;
+    height: 200px;
+  }
+}

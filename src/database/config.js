@@ -24,8 +24,14 @@ if (process.env.DB_SSL === "true") {
 
 var pool = null;
 
+// valores: lista com os valores dos "?" da instrução. O mysql2 os escapa, então o que o usuário
+// digitou nunca vira parte do SQL (evita SQL injection). Pode ser omitido.
 // silencioso = true não mostra o resultado da consulta no console (usado pelo cache, que faz muitas)
-function executar(instrucao, silencioso) {
+function executar(instrucao, valores, silencioso) {
+    if (!Array.isArray(valores)) {
+        silencioso = valores;
+        valores = [];
+    }
 
     if (process.env.AMBIENTE_PROCESSO !== "producao" && process.env.AMBIENTE_PROCESSO !== "desenvolvimento") {
         console.log("\nO AMBIENTE (produção OU desenvolvimento) NÃO FOI DEFINIDO EM .env OU dev.env OU app.js\n");
@@ -35,7 +41,7 @@ function executar(instrucao, silencioso) {
     if (!pool) pool = mysql.createPool(mySqlConfig);
 
     return new Promise(function (resolve, reject) {
-        pool.query(instrucao, function (erro, resultados) {
+        pool.query(instrucao, valores, function (erro, resultados) {
             if (erro) {
                 console.log("ERRO NO MySQL SERVER: ", erro.sqlMessage || erro.message);
                 return reject(erro);

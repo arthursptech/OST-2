@@ -140,7 +140,14 @@
 </html>
 <!-- Desejável: mostrar tentativas -->
 <script>
-    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+    b_usuario.textContent = sessionStorage.NOME_USUARIO;
+
+    // Nomes digitados pelos usuários são escapados, para não virarem HTML/JavaScript na página
+    function escaparHtml(texto) {
+        return String(texto).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
     b_id.innerHTML = sessionStorage.ID_USUARIO
     let idUser = sessionStorage.ID_USUARIO;
     const ranking = document.getElementById('grafico-media');
@@ -153,7 +160,7 @@
                 resposta.json().then(function (resposta) {
                     console.log("Dados recebidos: ", JSON.stringify(resposta));
                     var topUser = resposta[0];
-                    document.getElementById("r_usuario").innerHTML = topUser.nome;
+                    document.getElementById("r_usuario").textContent = topUser.nome;
                     document.getElementById("idUser").innerHTML = topUser.fkUsuario;
 
                 })
@@ -193,7 +200,7 @@
                 resposta.json().then(function (resposta) {
                     console.log("Dados recebidos: ", JSON.stringify(resposta));
                     var topOst = resposta[0];
-                    document.getElementById("ost").innerHTML = topOst.titulo;
+                    document.getElementById("ost").textContent = topOst.titulo;
                 })
             }
         })
@@ -211,7 +218,7 @@
                         document.getElementById("div_posicao").innerHTML += `
                         <div class="posicao" ${resposta[i].fkUsuario == idUser ? 'id="meuUser"' : ''}>
                             <span>${posicao}º</span>
-                            <span>${resposta[i].nome}#${resposta[i].fkUsuario}</span>
+                            <span>${escaparHtml(resposta[i].nome)}#${resposta[i].fkUsuario}</span>
                             <span>${resposta[i].qtd_acertos}</span>
                         </div><br>`
                         posicao ++;

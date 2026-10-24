@@ -112,7 +112,9 @@
           </div>
         </div>
         <div id="div_aguardar" class="loading-div">
-          <img src="./assets/circle-loading.gif" id="loading-gif" />
+          <img src="./assets/imgs/joker_running.gif" id="loading-gif" />
+          <br>
+          <p>Cadastro realizado! Redirecionando...</p>
         </div>
         <div id="div_erros_login"></div>
       </div>
@@ -235,19 +237,22 @@
         console.log("resposta: ", resposta);
 
         if (resposta.ok) {
-          cardErro.style.display = "block";
-
-          mensagem_erro.innerHTML =
-            "Cadastro realizado com sucesso! Redirecionando para tela de Login...";
+          cardErro.style.display = "none";
+          // Mesma tela de carregamento do login e do quiz
+          aguardar();
 
           setTimeout(() => {
             window.location = "login.html";
           }, "2000");
 
           limparFormulario();
-          finalizarAguardar();
         } else {
-          throw "Houve um erro ao tentar realizar o cadastro!";
+          // Mostra o motivo vindo do servidor (ex.: email já cadastrado)
+          resposta.text().then(function (texto) {
+            cardErro.style.display = "block";
+            mensagem_erro.textContent = texto.replace(/^"|"$/g, "") || "Houve um erro ao tentar realizar o cadastro!";
+          });
+          finalizarAguardar();
         }
       })
       .catch(function (resposta) {

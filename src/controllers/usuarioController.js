@@ -1,42 +1,43 @@
 var usuarioModel = require("../models/usuarioModel");
+var senhaService = require("../services/senhaService");
 
 function autenticar(req, res) {
     var email = req.body.emailServer;
     var senha = req.body.senhaServer;
-    var id = req.body.idServer;
 
-    if (email == undefined) {
+    // Só aceitamos texto: um objeto viraria um trecho de SQL na consulta
+    if (typeof email != "string" || email == "") {
         res.status(400).send("Seu email está indefinido!");
-    } else if (senha == undefined) {
+    } else if (typeof senha != "string" || senha == "") {
         res.status(400).send("Sua senha está indefinida!");
     } else {
 
-        usuarioModel.autenticar(email, senha)
-            .then(
-                function (resultadoAutenticar) {
-                    console.log(`\nResultados encontrados: ${resultadoAutenticar.length}`);
-                    console.log(`Resultados: ${JSON.stringify(resultadoAutenticar)}`); // transforma JSON em String
-
-                    if (resultadoAutenticar.length == 1) {
-                        res.json({
-                            id: resultadoAutenticar[0].id,
-                            email: resultadoAutenticar[0].email,
-                            nome: resultadoAutenticar[0].nome,
-                            senha: resultadoAutenticar[0].senha
-                        });
-                        console.log(resultadoAutenticar);
-                        
-                    } else if (resultadoAutenticar.length == 0) {
-                        res.status(403).send("Email e/ou senha inválido(s)");
-                    } else {
-                        res.status(403).send("Mais de um usuário com o mesmo login e senha!");
+        usuarioModel.buscarPorEmail(email)
+            .then(async function (resultadoAutenticar) {
+                // Confere a senha em todas as contas com esse email (bancos antigos podem ter repetidos)
+                var usuario = null;
+                for (var candidato of resultadoAutenticar) {
+                    if (await senhaService.conferir(senha, candidato.senha)) {
+                        usuario = candidato;
+                        break;
                     }
                 }
-            ).catch(
+
+                if (usuario) {
+                    // Nunca devolvemos a senha (nem o hash) para o navegador
+                    res.json({
+                        id: usuario.id,
+                        email: usuario.email,
+                        nome: usuario.nome
+                    });
+                } else {
+                    res.status(403).send("Email e/ou senha inválido(s)");
+                }
+            }).catch(
                 function (erro) {
                     console.log(erro);
                     console.log("\nHouve um erro ao realizar o login! Erro: ", erro.sqlMessage);
-                    res.status(500).json(erro.sqlMessage);
+                    res.status(500).json("Houve um erro ao realizar o login");
                 }
             );
     }
@@ -50,28 +51,31 @@ function cadastrar(req, res) {
     var senha = req.body.senhaServer;
 
     // Faça as validações dos valores
-    if (nome == undefined) {
-        res.status(400).send("Seu nome está indefinido!");
-    } else if (email == undefined) {
-        res.status(400).send("Seu email está indefinido!");
-    } else if (senha == undefined) {
-        res.status(400).send("Sua senha está indefinida!");
+    // Só aceitamos texto: um objeto viraria um trecho de SQL na consulta
+    if (typeof nome != "string" || nome.trim() == "" || nome.length > 50) {
+        res.status(400).send("Seu nome está indefinido ou é longo demais!");
+    } else if (typeof email != "string" || email == "" || email.length > 60) {
+        res.status(400).send("Seu email está indefinido ou é longo demais!");
+    } else if (typeof senha != "string" || senha.length < 6) {
+        res.status(400).send("Sua senha precisa ter pelo menos 6 caracteres!");
     } else {
 
-        // Passe os valores como parâmetro e vá para o arquivo usuarioModel.js
-        usuarioModel.cadastrar(nome, email, senha)
-            .then(
-                function (resultado) {
-                    res.json(resultado);
+        usuarioModel.buscarPorEmail(email)
+            .then(async function (existentes) {
+                if (existentes.length > 0) {
+                    return res.status(409).send("Este email já está cadastrado!");
                 }
-            ).catch(
+                var senhaHash = await senhaService.gerarHash(senha);
+                var resultado = await usuarioModel.cadastrar(nome, email, senhaHash);
+                res.json({ id: resultado.insertId });
+            }).catch(
                 function (erro) {
                     console.log(erro);
                     console.log(
                         "\nHouve um erro ao realizar o cadastro! Erro: ",
                         erro.sqlMessage
                     );
-                    res.status(500).json(erro.sqlMessage);
+                    res.status(500).json("Houve um erro ao realizar o cadastro");
                 }
             );
     }

@@ -38,24 +38,6 @@ function calcularMedia() {
     return database.executar(instrucaoSql);
 }
 
-function adicionarResposta(resposta, usuario, tentativa) {
-    var instrucaoSql = `
-    INSERT INTO respostasUser (fkAlternativa, fkUsuario, fkTentativa) VALUES
-    (${resposta[0]}, ${usuario}, ${tentativa}),
-    (${resposta[1]}, ${usuario}, ${tentativa}),
-    (${resposta[2]}, ${usuario}, ${tentativa}),
-    (${resposta[3]}, ${usuario}, ${tentativa}),
-    (${resposta[4]}, ${usuario}, ${tentativa}),
-    (${resposta[5]}, ${usuario}, ${tentativa}),
-    (${resposta[6]}, ${usuario}, ${tentativa}),
-    (${resposta[7]}, ${usuario}, ${tentativa}),
-    (${resposta[8]}, ${usuario}, ${tentativa}),
-    (${resposta[9]}, ${usuario}, ${tentativa});`;
-
-    console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return database.executar(instrucaoSql);
-}
-
 // As alternativas do quiz são geradas a partir do Last.fm, então a alternativa escolhida
 // é registrada no momento da resposta e depois vinculada à resposta do usuário
 async function adicionarRespostasQuiz(alternativas, usuario, tentativa) {
@@ -78,10 +60,10 @@ async function adicionarRespostasQuiz(alternativas, usuario, tentativa) {
 
 function adicionarTentativa(usuario) {
     var instrucaoSql = `
-    INSERT INTO tentativas (fkUsuario) VALUES (${usuario});`;
+    INSERT INTO tentativas (fkUsuario) VALUES (?);`;
 
     console.log("Executando a instrução SQL: \n" + instrucaoSql);
-    return database.executar(instrucaoSql);
+    return database.executar(instrucaoSql, [Number(usuario)]);
 }
 
 function buscarScore(idUsuario) {
@@ -117,7 +99,7 @@ function buscarTentativa(idUsuario) {
     var instrucaoSql = `
     SELECT DATE_FORMAT(MAX(dtHrRegistro),'%d/%m/%Y') dtTentativa,
     COUNT(*) tentativaAtual
-    FROM tentativas WHERE fkUsuario = ${idUsuario}
+    FROM tentativas WHERE fkUsuario = ${Number(idUsuario)}
     GROUP BY fkUsuario
     LIMIT 1;`
 
@@ -169,7 +151,6 @@ module.exports = {
     buscarTopUsuario,
     buscarRanking,
     calcularMedia,
-    adicionarResposta,
     adicionarTentativa,
     adicionarRespostasQuiz,
     buscarScore,

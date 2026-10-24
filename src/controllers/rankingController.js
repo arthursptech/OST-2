@@ -42,31 +42,6 @@ function calcularMedia(req, res) {
     });
 }
 
-async function adicionarResposta(req, res) {
-    var resposta = req.body.respostasServer;
-    var usuario = req.body.userServer;
-
-    if (usuario.length < 0 || resposta.length < 0) {
-        return res.status(400).send("Dados inválidos")
-    }
-    try {
-        var result = await rankingModel.adicionarTentativa(usuario);
-        
-        var tentativaId = result.insertId;
-
-        await rankingModel.adicionarResposta(resposta, usuario, tentativaId)
-
-        res.status(200).json({
-            ok_sql: "Ambas funções funcionaram: alternativa e resposta",
-            tentativa: tentativaId 
-        });
-    } catch (erro) {
-        console.log(erro);
-        console.log("Houve um erro ao adicionar os dados do quiz: ", erro.sqlMessage);
-        res.status(500).json(erro.sqlMessage);
-    };
-}
-
 function buscarScore(req, res) {
     console.log(req.params.id);
 
@@ -145,7 +120,6 @@ module.exports = {
     buscarTopUsuario,
     buscarRanking,
     calcularMedia,
-    adicionarResposta,
     buscarScore,
     buscarTopOst,
     buscarTentativa,

@@ -15,10 +15,6 @@ router.get("/calcular", function(req,res) {
     rankingController.calcularMedia(req,res);
 })
 
-router.post("/quiz", function(req,res) {
-    rankingController.adicionarResposta(req,res);
-})
-
 router.get("/score/:id", function(req,res) {
     rankingController.buscarScore(req,res);
 })

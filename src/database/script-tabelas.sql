@@ -6,7 +6,8 @@ CREATE TABLE usuario (
 	id INT PRIMARY KEY AUTO_INCREMENT,
 	nome VARCHAR(50),
 	email VARCHAR(60),
-	senha VARCHAR(50)
+	-- Hash da senha (scrypt), nunca a senha em texto puro
+	senha VARCHAR(255)
 );
 
 CREATE TABLE mensagem (

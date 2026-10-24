@@ -466,7 +466,9 @@ h2 {
   align-items: center;
   color:#E63946;
   font-size: 20px;
-  font-family: Persona5;
+  font-family: "Montserrat", sans-serif;
+  /* Por cima de tudo: os cartões inclinados do login/cadastro e o cabeçalho (z-index 1000) */
+  z-index: 2000;
 }
 
 .loading-div img {
@@ -750,11 +752,195 @@ background-color: #f81b2d;
   color: #121212;
 }
 
-.oculos img{
+/* Óculos do Kamina "apoiados" no topo do botão, retos e centralizados (em qualquer tamanho de tela) */
+.oculos {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.oculos img {
+  position: relative;
+  z-index: 1;
   width: 60px;
   height: 30px;
-  position: absolute;
-  transform: rotate(-40deg);
-  transform-origin: center;
-  margin-left: -1.9%;
+  /* Encosta a parte de baixo dos óculos na borda de cima do botão (que tem margin-top: 2vh) */
+  margin-bottom: calc(-2vh - 10px);
+}
+/* ===================== CELULAR ===================== */
+/* Abaixo de 768px o layout empilha os blocos e usa a largura toda da tela */
+
+@media (max-width: 768px) {
+  .container {
+    width: 92%;
+  }
+
+  /* Cabeçalho: música, título e menu um embaixo do outro */
+  .musica {
+    margin-bottom: 0;
+  }
+  .musica span {
+    font-size: 13px;
+  }
+  .musica img {
+    height: 18px;
+  }
+  .header {
+    height: auto;
+    padding: 4px 0 8px;
+  }
+  .header .container {
+    flex-direction: column;
+    gap: 4px;
+  }
+  .titulo {
+    font-size: 1.5rem;
+  }
+  .navbar {
+    width: auto;
+    margin: 0;
+    padding: 0;
+    gap: 14px;
+    justify-content: center;
+  }
+
+  h2 {
+    font-size: 24px;
+    text-align: center;
+  }
+
+  /* Banners: a altura acompanha a proporção da imagem, para ela aparecer inteira
+     (o "fixed" não funciona bem em celulares) */
+  .banner {
+    height: auto;
+    aspect-ratio: 1920 / 800;
+    background-size: cover;
+    background-position: center;
+  }
+  .banner.phm {
+    aspect-ratio: 16 / 9;
+  }
+  .banner.ttgl {
+    aspect-ratio: 3600 / 1920;
+  }
+  .banner.phm,
+  .banner.ttgl,
+  .background-phm,
+  .background-ttgl {
+    background-size: cover;
+    background-attachment: scroll;
+  }
+
+  /* Página inicial */
+  .sobre span {
+    width: 100%;
+  }
+  .interesse .top {
+    width: 100%;
+    height: auto;
+    max-height: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin: 10px 0;
+  }
+  .interesse span {
+    width: 100%;
+    font-size: 16px;
+  }
+  .interesse img {
+    width: 100%;
+    max-width: 340px;
+    height: auto;
+  }
+  .container .boxes,
+  .valor .boxes {
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    padding: 20px 0;
+  }
+  .exemplo .container img,
+  .background-phm .box img {
+    height: auto;
+  }
+  iframe {
+    height: 200px;
+  }
+
+  /* Rodapé */
+  .footer {
+    height: auto;
+    padding: 20px 0;
+  }
+  .footer .container .boxes {
+    gap: 10px;
+  }
+  .footer .box {
+    align-items: center;
+  }
+
+  /* Login e cadastro: cartões centralizados em uma coluna */
+  .login,
+  .cadastro {
+    height: auto;
+    min-height: var(--tamanho-login);
+    padding-bottom: 30px;
+    background-position: center;
+  }
+  .divisao {
+    flex-direction: column;
+    align-items: center;
+  }
+  .login .container,
+  .cadastro .container,
+  .login .container-center,
+  .cadastro .container-center {
+    width: 100%;
+    margin: 0;
+    align-items: center;
+  }
+  .card {
+    width: min(300px, 78vw);
+  }
+  .card_erro {
+    width: 80%;
+    left: 10%;
+    margin-right: 0;
+  }
+  .mensagem-alarme {
+    width: auto;
+  }
+
+  /* Páginas das OSTs (Project Hail Mary e Gurren Lagann) */
+  .background-phm img,
+  .background-ttgl img {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+  }
+  .background-phm p,
+  .background-ttgl p {
+    max-width: 100%;
+    font-size: 16px;
+  }
+  .background-ttgl hr {
+    width: 80%;
+  }
+  /* Os óculos do Kamina continuam pequenos, por cima do botão */
+  .background-ttgl .oculos img {
+    width: 60px;
+    height: 30px;
+  }
+  /* "Antiespiral" embaixo da imagem, centralizado e reto */
+  .diagonal {
+    flex-direction: column;
+    align-items: center;
+  }
+  .diagonal .antiespiral {
+    position: static;
+    transform: none;
+    margin: 8px 0 0;
+    font-size: 22px;
+    text-align: center;
+  }
 }

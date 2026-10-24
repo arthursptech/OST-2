@@ -557,3 +557,185 @@ background-color: #f81b2d;
 .loading-div img, .loading-div p {
   transform: translateX(20%);
 }
+/* ===================== CELULAR ===================== */
+/* Abaixo de 768px a barra lateral vira uma barra no topo e o conteúdo ocupa a tela toda */
+
+@media (max-width: 768px) {
+  .janela {
+    flex-direction: column;
+  }
+
+  .header-left {
+    position: sticky;
+    width: 100%;
+    height: auto;
+    box-sizing: border-box;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px;
+    border-right: none;
+    border-bottom: 3px solid #E63946;
+  }
+  .header-left h1 {
+    width: 100%;
+    margin: 0;
+    font-size: 1.3rem;
+    text-align: center;
+  }
+  .hello {
+    width: 100%;
+  }
+  .hello h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    text-align: center;
+  }
+  .hello h3 br {
+    display: none;
+  }
+  .btn-nav,
+  .btn-nav-white,
+  .btn-logout {
+    width: auto;
+    margin: 0;
+    padding: 6px 14px;
+    border-radius: 5px;
+  }
+  .btn-nav-white {
+    border-width: 2px;
+  }
+  .btn-logout {
+    border-width: 2px;
+  }
+  .header-left h3 {
+    font-size: 0.95rem;
+  }
+
+  /* Conteúdo das páginas */
+  .dash,
+  .dash-right {
+    width: 100%;
+    left: 0;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* Ranking: indicadores em duas colunas e gráficos um embaixo do outro */
+  .area-parametros-alerta {
+    width: 94%;
+    margin: 12px auto 0;
+  }
+  .parametros-alerta {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .item-regua {
+    width: calc(50% - 4px);
+    box-sizing: border-box;
+    height: auto;
+    min-height: 90px;
+  }
+  .item-regua p {
+    font-size: 16px;
+  }
+  /* Com 5 indicadores, o último ocupa a linha toda */
+  .item-regua:last-child {
+    width: 100%;
+  }
+  .perigo-quente {
+    margin-left: 0;
+  }
+  .graphs-line {
+    flex-direction: column;
+    align-items: center;
+  }
+  .dash .ranking-graph,
+  .dash .ranking-avg-graph,
+  .ranking-attempt-graph {
+    width: 94%;
+    box-sizing: border-box;
+    margin: 16px 0 0;
+    min-height: 0;
+  }
+  .dash .ranking-graph {
+    max-height: 45vh;
+  }
+  .dash .ranking-avg-graph {
+    max-height: none;
+  }
+  .ranking-attempt-graph {
+    max-height: 35vh;
+    font-size: 20px;
+  }
+  .posicao {
+    height: auto;
+  }
+  .posicao span {
+    margin: 8px 12px;
+    font-size: 16px;
+  }
+  canvas {
+    height: 32vh !important;
+  }
+
+  /* Quiz */
+  .inicio {
+    width: 90%;
+    height: auto;
+    box-sizing: border-box;
+    margin: 30px auto;
+    padding: 30px 10px;
+    font-size: 24px;
+  }
+  .question {
+    width: 94%;
+    box-sizing: border-box;
+    margin: 16px auto 0;
+    padding: 12px 6px;
+    font-size: 18px;
+    text-align: center;
+  }
+  .container-choice,
+  .container-choice2 {
+    width: 50%;
+  }
+  .question img {
+    width: 38vw;
+    height: 38vw;
+    max-width: 170px;
+    max-height: 170px;
+  }
+  /* Sem mouse no celular: o zoom do hover ficaria "preso" depois do toque */
+  .question img:hover {
+    transform: none;
+  }
+  .btn-nav.questao {
+    font-size: 16px;
+  }
+  .btn-final .btn-nav {
+    width: 80%;
+    box-sizing: border-box;
+    margin: 16px auto;
+    font-size: 1.2rem;
+  }
+
+  /* Fórum */
+  .dash-right .mensagens h1 {
+    font-size: 1.5rem;
+    text-align: center;
+  }
+  .publicacao {
+    padding: 14px 8px;
+    word-break: break-word;
+  }
+  .div-buttons > * {
+    margin-left: 12px;
+  }
+
+  .loading-div img,
+  .loading-div p {
+    transform: none;
+  }
+}

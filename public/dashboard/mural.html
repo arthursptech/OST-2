@@ -103,9 +103,16 @@
 
 <script>
     
-    b_usuario.innerHTML = sessionStorage.NOME_USUARIO;
+    b_usuario.textContent = sessionStorage.NOME_USUARIO;
     b_id.innerHTML = sessionStorage.ID_USUARIO;
     let infoPostagem = [];
+
+    function escaparHtml(texto) {
+        return String(texto).replace(/[&<>"']/g, function (c) {
+            return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+    }
+
     function limparFormulario() {
         document.getElementById("form_postagem").reset();
     }
@@ -184,7 +191,8 @@
             method: "DELETE",
             headers: {
                 "Content-Type": "application/json"
-            }
+            },
+            body: JSON.stringify({ idUsuario: sessionStorage.ID_USUARIO })
         }).then(function (resposta) {
 
             if (resposta.ok) {
@@ -232,10 +240,11 @@
                         var btnDeletar = document.createElement("button");
 
 
-                        spanID.innerHTML = "ID: <b>" + publicacao.idMensagem + "</b>";
-                        spanTitulo.innerHTML = "Título: <b>" + publicacao.titulo + "</b>";
-                        spanNome.innerHTML = "Autor: <b>" + publicacao.nome + "#" + publicacao.fkUsuario + "</b>";
-                        divDescricao.innerHTML = "Descrição: <b>" + publicacao.descricao + "</b>";
+                        // Textos digitados pelos usuários são escapados, para não virarem HTML/JavaScript na página
+                        spanID.innerHTML = "ID: <b>" + escaparHtml(publicacao.idMensagem) + "</b>";
+                        spanTitulo.innerHTML = "Título: <b>" + escaparHtml(publicacao.titulo) + "</b>";
+                        spanNome.innerHTML = "Autor: <b>" + escaparHtml(publicacao.nome) + "#" + escaparHtml(publicacao.fkUsuario) + "</b>";
+                        divDescricao.innerHTML = "Descrição: <b>" + escaparHtml(publicacao.descricao) + "</b>";
                         btnEditar.innerHTML = "Editar";
                         btnDeletar.innerHTML = "Deletar";
 

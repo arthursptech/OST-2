@@ -41,6 +41,11 @@ app.use("/ranking", rankingRouter);
 app.use("/quiz", quizRouter);
 app.use("/spotify", spotifyRouter);
 
+// Contas antigas tinham a senha em texto puro: troca pelo hash ao subir o servidor
+require("./src/models/usuarioModel").protegerSenhasAntigas().catch(function (erro) {
+    console.log("Não foi possível proteger as senhas antigas: ", erro.message || erro);
+});
+
 // Já carrega a lista de músicas do Last.fm ao subir o servidor, para o primeiro quiz não demorar
 require("./src/services/ostService").listarMusicasOst().catch(function (erro) {
     console.log("Não foi possível carregar as músicas do Last.fm: ", erro.message);

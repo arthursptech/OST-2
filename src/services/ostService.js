@@ -905,14 +905,25 @@ async function buscarAnimeAniList(midia) {
     if (!resposta.ok) throw new Error(`HTTP ${resposta.status} no AniList`);
     var json = await resposta.json();
 
-    var achado = ((json.data && json.data.Page && json.data.Page.media) || []).find(function (anime) {
-        var titulos = [anime.title.romaji, anime.title.english, anime.title.native].concat(anime.synonyms || []);
-        // Igualdade exata, para não trazer um spin-off/filme com nome parecido
-        return titulos.some(function (t) {
-            if (!t) return false;
+    var animes = (json.data && json.data.Page && json.data.Page.media) || [];
+    function titulosDe(anime) {
+        return [anime.title.romaji, anime.title.english, anime.title.native].concat(anime.synonyms || []).filter(Boolean);
+    }
+    // Primeiro, igualdade exata, para não trazer um spin-off/filme com nome parecido
+    var achado = animes.find(function (anime) {
+        return titulosDe(anime).some(function (t) {
             return mesmoNome(t, midia) || (normalizar(t) && normalizar(t) === normalizar(midia));
         });
     });
+    // Depois, o nome da obra seguido de um subtítulo com hífen: "Parasyte" -> "Parasyte -the maxim-"
+    // (só no primeiro resultado da busca, que é o mais próximo)
+    if (!achado && animes.length) {
+        var subtitulo = titulosDe(animes[0]).some(function (t) {
+            // Só hífen/til: dois-pontos costumam ser continuações ou derivados ("Honkai Impact 3rd: Reburn")
+            return t.toLowerCase().startsWith(midia.toLowerCase()) && /^\s+[-~–—]/.test(t.slice(midia.length));
+        });
+        if (subtitulo) achado = animes[0];
+    }
     var resultado = achado
         ? { titulo: achado.title.english || achado.title.romaji, imagem: achado.coverImage.extraLarge || achado.coverImage.large }
         : null;
@@ -925,7 +936,7 @@ async function buscarImagemWikipedia(midia) {
         action: "query",
         generator: "search",
         gsrsearch: midia,
-        gsrlimit: 3,
+        gsrlimit: 10,
         prop: "pageimages|description",
         piprop: "original",
         pilicense: "any",
@@ -936,27 +947,66 @@ async function buscarImagemWikipedia(midia) {
         .sort(function (a, b) { return a.index - b.index; });
     // Só aceitamos páginas de mídias (evita trazer foto de cidade, pessoa etc. com o mesmo nome)
     paginas = paginas.filter(function (p) {
-        return p.original && DESCRICAO_MIDIA.test(p.description || "") && !DESCRICAO_PESSOA.test(p.description || "");
+        return DESCRICAO_MIDIA.test(p.description || "") && !DESCRICAO_PESSOA.test(p.description || "");
     });
     // Remove o "(film)", "(video game)" etc. do título da página
     function tituloPagina(p) { return p.title.replace(/\s*\(.*\)\s*$/, ""); }
-    // Prioridade: título igual -> título que contém o nome completo da mídia (ex.: "Nier Replicant ver.1.22..." e não "Nier")
-    // -> nome da mídia que contém o título (ex.: "Attack on Titan Season 2" -> "Attack on Titan")
-    var achado = paginas.find(function (p) { return normalizar(tituloPagina(p)) === normalizar(midia); })
-        || paginas.find(function (p) { return normalizar(tituloPagina(p)).includes(normalizar(midia)); })
-        || paginas.find(function (p) { return titulosParecidos(tituloPagina(p), midia); });
+    var midiaNormalizada = normalizar(midia);
+    // Prioridade: título igual, entre os 10 resultados (ex.: "Wednesday (TV series)" e não o filme "A Wednesday!")
+    // -> título que começa com o nome da mídia (ex.: "Nier Replicant ver.1.22..." e não "Nier")
+    // -> título que contém o nome / nome que contém o título (ex.: "Attack on Titan Season 2" -> "Attack on Titan");
+    // essas duas últimas só entre os 3 primeiros resultados, para não pegar páginas pouco relacionadas
+    var principais = paginas.filter(function (p) { return p.index <= 3; });
+    var exatas = paginas.filter(function (p) { return normalizar(tituloPagina(p)) === midiaNormalizada; });
+    // Se existe a página da obra mas ela não tem foto, não procuramos em páginas parecidas
+    // (seria outra obra com nome parecido): o quiz usa a capa do álbum
+    var candidatas = exatas.length ? exatas : [
+        paginas.filter(function (p) { return normalizar(tituloPagina(p)).startsWith(midiaNormalizada + " "); }),
+        principais.filter(function (p) { return normalizar(tituloPagina(p)).includes(midiaNormalizada); }),
+        principais.filter(function (p) { return titulosParecidos(tituloPagina(p), midia); })
+    ].flat();
+
+    // Algumas páginas (ex.: "Parasyte", "Wednesday (TV series)") não trazem a imagem pela busca:
+    // nesse caso usamos a imagem do quadro de informações (infobox) do artigo
+    var achado = null;
+    var imagem = null;
+    for (var pagina of candidatas) {
+        // Logos em .svg costumam ser texto em fundo transparente: usamos a imagem da infobox no lugar
+        var original = pagina.original && !/\.svg/i.test(pagina.original.source) ? pagina.original.source : null;
+        imagem = original || await buscarImagemInfobox(pagina.title);
+        if (imagem) {
+            achado = pagina;
+            break;
+        }
+    }
     if (!achado) return null;
 
     // A página é mais genérica que a mídia (ex.: "Nier" para "NieR Replicant"): procuramos no artigo
     // uma imagem com as palavras que faltam (ex.: "Nier Replicant remake art.png")
     var tituloNormalizado = normalizar(tituloPagina(achado));
-    var midiaNormalizada = normalizar(midia);
     if (tituloNormalizado !== midiaNormalizada && midiaNormalizada.includes(tituloNormalizado)) {
         var extras = midiaNormalizada.replace(tituloNormalizado, " ").split(" ").filter(Boolean);
         var variante = await buscarImagemDoArtigo(achado.title, extras);
         if (variante) return variante;
     }
-    return achado.original.source;
+    return imagem;
+}
+
+// Primeira imagem do quadro de informações (infobox) do artigo
+async function buscarImagemInfobox(titulo) {
+    var query = new URLSearchParams({ action: "parse", page: titulo, prop: "text", section: 0, format: "json" });
+    var json = await buscarJson(`https://en.wikipedia.org/w/api.php?${query}`);
+    var html = (json.parse && json.parse.text && json.parse.text["*"]) || "";
+    var inicio = html.indexOf('class="infobox');
+    if (inicio < 0) return null;
+    // Ignora logos e letreiros: costumam ser texto em fundo transparente, que some no fundo escuro do quiz
+    var imagens = html.slice(inicio).match(/<img[^>]+src="[^"]+"/g) || [];
+    var foto = imagens.map(function (tag) { return tag.match(/src="([^"]+)"/)[1]; })
+        .find(function (src) { return !/\.svg|logo|title_text|wordmark/i.test(src) && !/\/(1\d|[1-9])px-/.test(src); });
+    if (!foto) return null;
+    // A miniatura vem com 250px: pedimos uma versão maior
+    var src = foto.replace(/&amp;/g, "&").replace(/\/(\d+)px-/, "/500px-");
+    return src.startsWith("//") ? `https:${src}` : src;
 }
 
 async function buscarImagemDoArtigo(titulo, palavras) {
