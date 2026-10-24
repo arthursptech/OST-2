@@ -272,12 +272,35 @@
             musica.dataset.alternativo = "";
         }
 
+        // Se o áudio principal não tocar (arquivo com erro, bloqueado ou travado), usa o alternativo
+        function usarAlternativo() {
+            if (!musica.dataset.alternativo) return false;
+            musica.src = musica.dataset.alternativo;
+            musica.dataset.alternativo = "";
+            tocarTrecho(questao);
+            return true;
+        }
+
         function iniciar() {
-            // O preview tem ~30s, então sorteamos o início do trecho
-            let maxInicio = Math.max(0, (musica.duration || 0) - DURACAO_TRECHO);
-            musica.currentTime = Math.random() * maxInicio;
+            // O preview tem ~30s, então sorteamos o início do trecho.
+            // Alguns .ogg do AnimeThemes chegam sem a duração (Infinity/NaN): aí começamos do início
+            let duracao = isFinite(musica.duration) ? musica.duration : 0;
+            let maxInicio = Math.max(0, duracao - DURACAO_TRECHO);
+            try {
+                musica.currentTime = Math.random() * maxInicio;
+            } catch (erro) {
+                musica.currentTime = 0;
+            }
+
+            // Se em alguns segundos o trecho não começar, troca para o alternativo
+            timerTrecho = setTimeout(function () {
+                if (musica.paused || musica.readyState < 3) {
+                    if (!usarAlternativo()) contagem.innerHTML = "Ouvir trecho";
+                }
+            }, 6000);
 
             musica.play().then(function () {
+                clearTimeout(timerTrecho);
                 let restante = DURACAO_TRECHO;
                 contagem.innerHTML = `Tocando... ${restante}s`;
                 timerContagem = setInterval(function () {
@@ -288,19 +311,28 @@
             }).catch(function (erro) {
                 // AbortError: o trecho foi pausado antes de começar (usuário trocou de questão)
                 if (erro.name === "AbortError") return;
+                clearTimeout(timerTrecho);
                 // O navegador pode bloquear o autoplay, então o usuário clica para ouvir
-                console.log("Autoplay bloqueado: ", erro);
-                contagem.innerHTML = "Ouvir trecho";
+                if (erro.name === "NotAllowedError") {
+                    console.log("Autoplay bloqueado: ", erro);
+                    contagem.innerHTML = "Ouvir trecho";
+                    return;
+                }
+                console.log("Não foi possível tocar o trecho: ", erro);
+                if (!usarAlternativo()) contagem.innerHTML = "Ouvir trecho";
             });
         }
+
+        // Erro no meio do carregamento (ex.: o servidor do áudio recusou a requisição)
+        musica.onerror = function () {
+            pararTrecho();
+            if (!usarAlternativo()) contagem.innerHTML = "Trecho indisponível";
+        };
 
         if (musica.readyState >= 1) {
             iniciar();
         } else {
             musica.addEventListener("loadedmetadata", iniciar, { once: true });
-            musica.addEventListener("error", function () {
-                if (musica.dataset.alternativo) tocarTrecho(questao);
-            }, { once: true });
             musica.load();
         }
     }

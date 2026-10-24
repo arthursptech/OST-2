@@ -84,6 +84,28 @@ npm start ou node app.js
 
 ### Acesse http://localhost:3333
 
+## Deploy gratuito (Render + Aiven + cron-job.org)
+
+O site inteiro (páginas + API) roda em um único serviço Node no [Render](https://render.com), com o banco MySQL na [Aiven](https://aiven.io). Os dois têm plano gratuito (confira os limites atuais ao criar as contas).
+
+O cache das APIs, a lista de músicas do quiz e o login do Spotify ficam salvos no banco (tabela `cache_api`). Por isso o servidor volta a funcionar em segundos mesmo depois de reiniciar ou "dormir".
+
+### 1. Banco na Aiven
+1. Crie um serviço **Aiven for MySQL** no plano **Free**.
+2. Em *Connection information* anote host, porta, usuário (`avnadmin`), senha e banco (`defaultdb`) e baixe o **CA certificate**.
+3. Conecte com o MySQL Workbench (usando SSL) e rode o [script](./src/database/script-tabelas.sql) **sem** as linhas `CREATE DATABASE ost;` e `USE ost;`.
+4. (Recomendado) Rode o projeto **uma vez no seu computador** com o `.env` apontando para a Aiven (variáveis `DB_*` + `DB_SSL=true` + `DB_SSL_CA`). O servidor copia o cache local (pasta `cache/`) e a lista de músicas para o banco na nuvem, então o site já começa rápido. Faça também o login do Spotify em http://127.0.0.1:8080/spotify/login nesse momento.
+
+### 2. Servidor no Render
+1. *New* > *Web Service* > conecte o repositório do GitHub (branch `main`).
+2. Build command: `npm install` | Start command: `npm start` | Instance type: **Free**.
+3. Em *Environment*, cadastre as variáveis do `.env`: `AMBIENTE_PROCESSO=producao`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USER`, `DB_PASSWORD`, `DB_SSL=true`, `DB_SSL_CA`, `LASTFM_API_KEY`, `LASTFM_USER`, `LASTFM_LIMITE_MUSICAS`, `SPOTIFY_PLAYLIST_ID`, `SPOTIFY_CLIENT_ID`, `SPOTIFY_CLIENT_SECRET` e `SPOTIFY_REDIRECT_URI=https://SEU-APP.onrender.com/spotify/callback`. Não é preciso definir a porta.
+4. No app do Spotify (developer.spotify.com), adicione o Redirect URI `https://SEU-APP.onrender.com/spotify/callback`. Se o login do Spotify não foi feito no passo 1.4, acesse `https://SEU-APP.onrender.com/spotify/login` uma vez.
+5. A cada push na `main` o Render publica a nova versão automaticamente.
+
+### 3. Manter o site acordado (6h às 22h)
+O plano gratuito do Render "dorme" após 15 minutos sem acesso. Para evitar isso no horário de uso, crie no [cron-job.org](https://cron-job.org) uma tarefa que acessa `https://SEU-APP.onrender.com/saude` **a cada 10 minutos, das 6h às 21h50** (fuso `America/Sao_Paulo`). De madrugada o servidor dorme e não gasta as horas gratuitas do mês.
+
 ## Páginas e Funcionalidades
 
 ### <a href="./public/index.html">Homepage</a>

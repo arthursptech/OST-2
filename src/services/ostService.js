@@ -9,8 +9,7 @@
 // - AniList     -> imagem do anime (sem chave)
 // - Wikipedia   -> imagem da mídia (filme, jogo, série...) (sem chave)
 
-var fs = require("fs");
-var path = require("path");
+var cacheService = require("./cacheService");
 
 var LASTFM_API = "https://ws.audioscrobbler.com/2.0/";
 var LASTFM_USER = process.env.LASTFM_USER || "MsAqua";
@@ -35,18 +34,19 @@ var TAGS_OST = [
 ];
 
 // Descrições da Wikipedia que indicam uma mídia (filme, anime, jogo...)
+// Descrições como "American film actress" também citam "film", mas são de pessoas
+var DESCRICAO_PESSOA = /\b(actor|actress|singer|rapper|musician|composer|director|producer|screenwriter|writer|author|model|personality|politician|athlete|player|footballer|wrestler|comedian|youtuber|streamer|born)\b/i;
 var DESCRICAO_MIDIA = /\b(film|movie|anime|manga|video game|game|television|tv series|series|visual novel|light novel|novel|franchise|musical|ova)\b/i;
 
 var CACHE_MUSICAS_MS = 24 * 60 * 60 * 1000;
 var TIMEOUT_MS = 8000;
 
 // As APIs têm limite de requisições por minuto (iTunes ~20, AniList ~30, AnimeThemes ~90), então as
-// buscas são espaçadas e os resultados ficam salvos em disco (pasta cache/)
+// buscas são espaçadas e os resultados ficam salvos no banco (tabela cache_api)
 var INTERVALO_ITUNES_MS = 3000;
 var INTERVALO_ANILIST_MS = 2100;
 var INTERVALO_ANIMETHEMES_MS = 700;
 var INTERVALO_SPOTIFY_MS = 1000;
-var PASTA_CACHE = path.join(__dirname, "../../cache");
 
 // Palavras que indicam uma versão alternativa (cover, remix, ao vivo...) e não a gravação oficial
 var PALAVRAS_VERSAO = ["cover", "covered", "remix", "mix", "karaoke", "instrumental", "piano", "acoustic", "live",
@@ -88,28 +88,6 @@ async function buscarJson(url, tentativas = 3, timeoutMs = TIMEOUT_MS) {
     return resposta.json();
 }
 
-// Cache simples em disco: cada API tem o seu arquivo JSON
-function criarCacheDisco(nome) {
-    var arquivo = path.join(PASTA_CACHE, `${nome}.json`);
-    var dados = {};
-    try {
-        dados = JSON.parse(fs.readFileSync(arquivo, "utf8"));
-    } catch (erro) { }
-    return {
-        tem: function (chave) { return chave in dados; },
-        ler: function (chave) { return dados[chave]; },
-        salvar: function (chave, valor) {
-            dados[chave] = valor;
-            try {
-                fs.mkdirSync(PASTA_CACHE, { recursive: true });
-                fs.writeFileSync(arquivo, JSON.stringify(dados, null, 1));
-            } catch (erro) {
-                console.log(`Não foi possível salvar o cache ${nome}: `, erro.message);
-            }
-        }
-    };
-}
-
 // Garante um intervalo mínimo entre as chamadas de uma API
 function criarFila(intervaloMs) {
     var proxima = 0;
@@ -121,28 +99,44 @@ function criarFila(intervaloMs) {
     };
 }
 
-var cacheItunes = criarCacheDisco("itunes");
-var cacheAnimeThemes = criarCacheDisco("animethemes");
-var cacheImagens = criarCacheDisco("imagens");
-var cacheSpotify = criarCacheDisco("spotify");
-var cacheAniList = criarCacheDisco("anilist");
+// Caches guardados no banco (ver cacheService.js)
+var cacheItunes = cacheService.criarCache("itunes");
+var cacheAnimeThemes = cacheService.criarCache("animethemes");
+var cacheImagens = cacheService.criarCache("imagens");
+var cacheSpotify = cacheService.criarCache("spotify");
+var cacheAniList = cacheService.criarCache("anilist");
+var cacheLoginSpotify = cacheService.criarCache("spotify-login");
+var cacheListaMusicas = cacheService.criarCache("musicas");
 var aguardarVezItunes = criarFila(INTERVALO_ITUNES_MS);
 var aguardarVezAniList = criarFila(INTERVALO_ANILIST_MS);
 var aguardarVezAnimeThemes = criarFila(INTERVALO_ANIMETHEMES_MS);
 var aguardarVezSpotify = criarFila(INTERVALO_SPOTIFY_MS);
 
-function lastfm(parametros) {
+// Erros temporários do Last.fm (serviço instável, limite de requisições...) que valem uma nova tentativa
+var ERROS_TEMPORARIOS_LASTFM = [8, 11, 16, 29];
+
+async function lastfm(parametros, tentativas = 3) {
     var query = new URLSearchParams({
         ...parametros,
         api_key: process.env.LASTFM_API_KEY,
         format: "json"
     });
-    return buscarJson(`${LASTFM_API}?${query}`).then(function (json) {
-        if (json.error) {
-            throw new Error(`Last.fm: ${json.message}`);
+    try {
+        var json = await buscarJson(`${LASTFM_API}?${query}`);
+    } catch (erro) {
+        // Falha de conexão ou HTTP 5xx: espera um pouco e tenta de novo
+        if (tentativas <= 1) throw erro;
+        await new Promise(function (resolve) { setTimeout(resolve, 2000); });
+        return lastfm(parametros, tentativas - 1);
+    }
+    if (json.error) {
+        if (ERROS_TEMPORARIOS_LASTFM.includes(json.error) && tentativas > 1) {
+            await new Promise(function (resolve) { setTimeout(resolve, 2000); });
+            return lastfm(parametros, tentativas - 1);
         }
-        return json;
-    });
+        throw new Error(`Last.fm: ${json.message}`);
+    }
+    return json;
 }
 
 // Executa as funções com no máximo `limite` requisições simultâneas (evita estourar o rate limit das APIs)
@@ -245,7 +239,12 @@ function extrairMidiaDeTema(album) {
     var de = album.match(/\(from ["“]?([^)"”]+?)["”]?\)/i);
     if (de) return de[1].trim();
     var tema = album.match(/\(([^()"“]+?)\s*(?:["“][^"”]*["”]\s*)?(?:animated short |anime |game |opening |ending |main )?(?:theme song|theme|opening|ending)\)/i);
-    return tema ? tema[1].replace(/^(from|tv anime|anime|game)\s+/i, "").trim() : null;
+    if (tema) return tema[1].replace(/^(from|tv anime|anime|game)\s+/i, "").trim();
+    // "Starfall (Honkai Impact 3rd Ost - Impressions)" -> "Honkai Impact 3rd"
+    // (mas "Persona 5 (Original Soundtrack)" não: ali o parêntese só diz que é trilha)
+    var trilha = album.match(/\(([^()]+?)\s+(?:ost|o\.s\.t\.?|original soundtrack|soundtrack)\b[^()]*\)/i);
+    var obra = trilha ? trilha[1].replace(/(\s*\b(original|official|game|series|anime|tv|video|motion|picture|the|piano|orchestral|complete|deluxe)\b)+\s*$/i, "").trim() : "";
+    return obra.length >= 2 ? obra : null;
 }
 
 // Indica se o nome do álbum é de uma trilha sonora (e não uma coletânea, single, best of...)
@@ -316,17 +315,8 @@ async function carregarMusicasLastfm() {
 // A playlist já é só de OSTs, então todas as músicas entram (sem filtro de gênero)
 
 // O Spotify só libera o conteúdo da playlist com o login do dono dela (fluxo "Authorization Code").
-// O login é feito uma vez em /spotify/login; o refresh token fica salvo em cache/spotify-login.json
-var ARQUIVO_LOGIN_SPOTIFY = path.join(PASTA_CACHE, "spotify-login.json");
+// O login é feito uma vez em /spotify/login; o refresh token fica salvo no banco (tabela cache_api)
 var REDIRECT_URI_SPOTIFY = process.env.SPOTIFY_REDIRECT_URI || "http://127.0.0.1:8080/spotify/callback";
-
-function lerLoginSpotify() {
-    try {
-        return JSON.parse(fs.readFileSync(ARQUIVO_LOGIN_SPOTIFY, "utf8"));
-    } catch (erro) {
-        return null;
-    }
-}
 
 function urlLoginSpotify(estado) {
     var query = new URLSearchParams({
@@ -357,8 +347,8 @@ async function pedirTokenSpotify(parametros) {
 // Chamado pela rota /spotify/callback com o código que o Spotify devolve após o login
 async function concluirLoginSpotify(codigo) {
     var json = await pedirTokenSpotify({ grant_type: "authorization_code", code: codigo, redirect_uri: REDIRECT_URI_SPOTIFY });
-    fs.mkdirSync(PASTA_CACHE, { recursive: true });
-    fs.writeFileSync(ARQUIVO_LOGIN_SPOTIFY, JSON.stringify({ refresh_token: json.refresh_token }));
+    await cacheService.inicializar();
+    cacheLoginSpotify.salvar("refresh_token", json.refresh_token);
 
     // Recarrega a lista de músicas já com a playlist completa
     cacheMusicas.atualizadoEm = 0;
@@ -368,13 +358,14 @@ async function concluirLoginSpotify(codigo) {
 }
 
 async function tokenSpotify() {
-    var login = lerLoginSpotify();
-    if (!login || !login.refresh_token) {
+    await cacheService.inicializar();
+    var refreshToken = cacheLoginSpotify.ler("refresh_token");
+    if (!refreshToken) {
         throw new Error("Spotify: faça o login em /spotify/login para ler a playlist completa");
     }
-    var json = await pedirTokenSpotify({ grant_type: "refresh_token", refresh_token: login.refresh_token });
+    var json = await pedirTokenSpotify({ grant_type: "refresh_token", refresh_token: refreshToken });
     // O Spotify às vezes devolve um refresh token novo
-    if (json.refresh_token) fs.writeFileSync(ARQUIVO_LOGIN_SPOTIFY, JSON.stringify({ refresh_token: json.refresh_token }));
+    if (json.refresh_token) cacheLoginSpotify.salvar("refresh_token", json.refresh_token);
     return json.access_token;
 }
 
@@ -591,6 +582,7 @@ function juntarSemRepetir(listas) {
 }
 
 async function carregarMusicasOst() {
+    await cacheService.inicializar();
     var listas = await Promise.all([
         carregarMusicasSpotify().catch(function (erro) {
             console.log("Erro ao carregar a playlist do Spotify: ", erro.message);
@@ -608,8 +600,19 @@ async function carregarMusicasOst() {
     return lista;
 }
 
-// Lista de músicas OST do usuário, com cache de 24h
+// Lista de músicas OST do usuário, com cache de 24h.
+// A lista pronta fica salva no banco: quando o servidor reinicia, ela é usada na hora e,
+// se tiver mais de 24h, é atualizada em segundo plano (ninguém precisa esperar)
 async function listarMusicasOst() {
+    if (!cacheMusicas.lista) {
+        await cacheService.inicializar();
+        var salva = cacheListaMusicas.ler("lista");
+        if (salva && salva.lista && salva.lista.length) {
+            cacheMusicas.lista = salva.lista;
+            cacheMusicas.atualizadoEm = salva.atualizadoEm;
+        }
+    }
+
     var expirado = Date.now() - cacheMusicas.atualizadoEm > CACHE_MUSICAS_MS;
     if (cacheMusicas.lista && !expirado) {
         return cacheMusicas.lista;
@@ -619,6 +622,7 @@ async function listarMusicasOst() {
             .then(function (lista) {
                 cacheMusicas.lista = lista;
                 cacheMusicas.atualizadoEm = Date.now();
+                cacheListaMusicas.salvar("lista", { lista: lista, atualizadoEm: cacheMusicas.atualizadoEm });
                 return lista;
             })
             .finally(function () {
@@ -932,7 +936,7 @@ async function buscarImagemWikipedia(midia) {
         .sort(function (a, b) { return a.index - b.index; });
     // Só aceitamos páginas de mídias (evita trazer foto de cidade, pessoa etc. com o mesmo nome)
     paginas = paginas.filter(function (p) {
-        return p.original && DESCRICAO_MIDIA.test(p.description || "");
+        return p.original && DESCRICAO_MIDIA.test(p.description || "") && !DESCRICAO_PESSOA.test(p.description || "");
     });
     // Remove o "(film)", "(video game)" etc. do título da página
     function tituloPagina(p) { return p.title.replace(/\s*\(.*\)\s*$/, ""); }

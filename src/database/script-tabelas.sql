@@ -55,6 +55,15 @@ CREATE TABLE respostasUser (
     FOREIGN KEY (fkTentativa) REFERENCES tentativas(idTentativa)
 );
 
+-- Cache das APIs externas e da lista de músicas do quiz (criada automaticamente pelo servidor se não existir)
+CREATE TABLE cache_api (
+    nome VARCHAR(50) NOT NULL,
+    chave VARCHAR(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+    valor MEDIUMTEXT,
+    atualizadoEm DATETIME DEFAULT NOW() ON UPDATE NOW(),
+    PRIMARY KEY (nome, chave)
+);
+
 INSERT INTO perguntas (questao) VALUES
 ('Q1'),
 ('Q2'),

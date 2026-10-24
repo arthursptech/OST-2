@@ -21,5 +21,8 @@
     "ignore": [
       "cache/*"
     ]
+  },
+  "engines": {
+    "node": ">=20"
   }
 }

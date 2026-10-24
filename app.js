@@ -10,7 +10,8 @@ require("dotenv").config({ path: caminho_env });
 var express = require("express");
 var cors = require("cors");
 var path = require("path");
-var PORTA_APP = process.env.APP_PORT;
+// Hospedagens como o Render definem a porta pela variável PORT
+var PORTA_APP = process.env.PORT || process.env.APP_PORT;
 var HOST_APP = process.env.APP_HOST;
 
 var app = express();
@@ -27,6 +28,11 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(cors());
+
+// Rota leve para o agendador (cron-job.org) manter o servidor acordado
+app.get("/saude", function (req, res) {
+    res.status(200).send("ok");
+});
 
 app.use("/", indexRouter);
 app.use("/usuarios", usuarioRouter);
